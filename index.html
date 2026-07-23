@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tasty Travels: Merge</title>
+    <title>Tasty Travels: Mystery Box</title>
     <style>
         * { 
             box-sizing: border-box; 
@@ -16,51 +16,66 @@
             -webkit-user-select: none; 
             user-select: none; 
         }
-        body { background: #fff8f0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; height: 100dvh; padding: 20px 10px; color: #4a3b32; overflow: hidden; }
+        body { background: #fff8f0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; height: 100dvh; padding: 15px 5px; color: #4a3b32; overflow: hidden; }
         header { text-align: center; width: 100%; position: relative; }
-        h1 { font-size: 24px; color: #ff6b6b; margin-bottom: 4px; font-weight: 800; text-shadow: 1px 1px 0px #ffe3e3; }
-        .version { font-size: 11px; color: #b09e93; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
+        h1 { font-size: 22px; color: #ff6b6b; margin-bottom: 2px; font-weight: 800; text-shadow: 1px 1px 0px #ffe3e3; }
+        .version { font-size: 10px; color: #b09e93; font-weight: bold; margin-bottom: 6px; letter-spacing: 1px; }
         
-        .score-container { display: flex; justify-content: center; gap: 15px; width: 100%; max-width: 380px; margin-bottom: 10px; }
-        .score-box { background: #fff; padding: 8px 16px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 14px; font-weight: bold; flex: 1; text-align: center; border: 2px solid #fae1dd; }
-        .score-box span { display: block; font-size: 18px; color: #ff6b6b; margin-top: 2px; }
+        .score-container { display: flex; justify-content: center; gap: 10px; width: 100%; max-width: 420px; margin-bottom: 8px; }
+        .score-box { background: #fff; padding: 6px 12px; border-radius: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.05); font-size: 13px; font-weight: bold; flex: 1; text-align: center; border: 2px solid #fae1dd; }
+        .score-box span { display: block; font-size: 16px; color: #ff6b6b; margin-top: 2px; }
         
-        .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; aspect-ratio: 1; background: #e3d5c8; padding: 12px; border-radius: 20px; box-shadow: inset 0 4px 8px rgba(0,0,0,0.08); }
+        /* 7 x 9 대형 보드판 그리드 */
+        .board { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 5px; 
+            width: 100%; 
+            max-width: 420px; 
+            aspect-ratio: 7 / 9; 
+            background: #e3d5c8; 
+            padding: 8px; 
+            border-radius: 16px; 
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.08); 
+        }
         
         .cell { 
             background: #fdf0ed; 
-            border-radius: 14px; 
+            border-radius: 8px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
             cursor: pointer; 
             position: relative; 
-            box-shadow: 0 4px 0 #d7c4b7; 
-            border: 3px solid transparent; 
+            box-shadow: 0 2px 0 #d7c4b7; 
+            border: 2px solid transparent; 
             transition: transform 0.1s ease, background-color 0.1s ease; 
         }
-        .cell:active { transform: translateY(2px); box-shadow: 0 2px 0 #d7c4b7; }
-        .cell.selected { background: #ffe3e3 !important; border: 3px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.5); }
+        .cell:active { transform: translateY(1px); box-shadow: 0 1px 0 #d7c4b7; }
+        .cell.selected { background: #ffe3e3 !important; border: 2px solid #ff6b6b; box-shadow: 0 0 8px rgba(255,107,107,0.5); }
         
-        .item-icon { font-size: 32px; line-height: 1; margin-bottom: 4px; pointer-events: none; }
-        .item-name { font-size: 10px; font-weight: bold; color: #7a6558; background: rgba(255,255,255,0.7); padding: 1px 6px; border-radius: 6px; pointer-events: none; }
+        /* 미스터리 상자 스타일 특별 강조 */
+        .cell.box-item { background: #fff3cd; border: 2px dashed #ffecb5; }
 
-        .controls { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
-        button { width: 100%; padding: 14px; font-size: 16px; font-weight: bold; border: none; border-radius: 16px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 5px 0 #d94848; transition: all 0.1s; }
-        button:active { transform: translateY(3px); box-shadow: 0 2px 0 #d94848; }
-        .guide { font-size: 12px; color: #8c7365; text-align: center; margin-top: 4px; }
+        .item-icon { font-size: 20px; line-height: 1; margin-bottom: 2px; pointer-events: none; }
+        .item-name { font-size: 7px; font-weight: bold; color: #7a6558; background: rgba(255,255,255,0.7); padding: 1px 4px; border-radius: 4px; pointer-events: none; }
+
+        .controls { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 6px; }
+        button { width: 100%; padding: 12px; font-size: 15px; font-weight: bold; border: none; border-radius: 14px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 4px 0 #d94848; transition: all 0.1s; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #d94848; }
+        .guide { font-size: 11px; color: #8c7365; text-align: center; margin-top: 2px; }
 
         #game-over { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 10; }
-        .modal-content { background: #fff; padding: 30px; border-radius: 24px; text-align: center; width: 80%; max-width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-content h2 { color: #ff6b6b; margin-bottom: 10px; font-size: 22px; }
-        .modal-content p { margin-bottom: 20px; font-size: 15px; color: #666; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 20px; text-align: center; width: 80%; max-width: 280px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-content h2 { color: #ff6b6b; margin-bottom: 8px; font-size: 20px; }
+        .modal-content p { margin-bottom: 15px; font-size: 14px; color: #666; }
     </style>
 </head>
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.0.6</div>
+        <div class="version">v1.0.7 (7x9 Mystery Box)</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
@@ -70,14 +85,14 @@
     <div class="board" id="board"></div>
 
     <div class="controls">
-        <button onclick="refreshBoardItems()">재료 새로고침 🔄</button>
-        <p class="guide">랜덤 대박 진화와 리필 시스템이 적용되었습니다!</p>
+        <button onclick="spawnMysteryBox()">미스터리 상자 소환 📦</button>
+        <p class="guide">📦 상자를 터치하면 주변에 하위 아이템들이 랜덤으로 쏟아져요!</p>
     </div>
 
     <div id="game-over">
         <div class="modal-content">
             <h2>Game Over! 😢</h2>
-            <p>더 이상 합칠 수 없습니다!<br>최종 점수: <span id="final-score" style="font-weight:bold; color:#ff6b6b;">0</span>점</p>
+            <p>보드판에 빈자리가 없습니다!<br>최종 점수: <span id="final-score" style="font-weight:bold; color:#ff6b6b;">0</span>점</p>
             <button onclick="resetGame()">다시 시작하기</button>
         </div>
     </div>
@@ -99,21 +114,22 @@
         }, false);
 
         const stages = [
-            { icon: '💧', name: '맑은 물' },
-            { icon: '🌾', name: '황금 밀' },
-            { icon: '🍞', name: '고소한 빵' },
-            { icon: '🧀', name: '신선 치즈' },
-            { icon: '🍳', name: '달걀후라이' },
-            { icon: '🍔', name: '수제 햄버거' },
-            { icon: '🍕', name: '화덕 피자' },
-            { icon: '🥞', name: '팬케이크' },
-            { icon: '🍰', name: '딸기 케이크' },
-            { icon: '👑', name: '미슐랭 요리' }
+            { icon: '💧', name: '맑은 물' },      // val = 1
+            { icon: '🌾', name: '황금 밀' },      // val = 2
+            { icon: '🍞', name: '고소한 빵' },    // val = 3
+            { icon: '🧀', name: '신선 치즈' },    // val = 4
+            { icon: '🍳', name: '달걀후라이' },  // val = 5
+            { icon: '🍔', name: '수제 햄버거' },  // val = 6
+            { icon: '🍕', name: '화덕 피자' },    // val = 7
+            { icon: '🥞', name: '팬케이크' },    // val = 8
+            { icon: '🍰', name: '딸기 케이크' },  // val = 9
+            { icon: '👑', name: '미슐랭 요리' }   // val = 10
         ];
 
-        let board = Array(16).fill(0);
+        const TOTAL_CELLS = 7 * 9; // 63칸
+        let board = Array(TOTAL_CELLS).fill(0);
         let score = 0;
-        let bestScore = localStorage.getItem('tasty_best') || 0;
+        let bestScore = localStorage.getItem('tasty_best_v2') || 0;
         let selectedIdx = null;
 
         document.getElementById('best-score').innerText = bestScore;
@@ -127,7 +143,14 @@
                 cell.className = 'cell';
                 if (selectedIdx === idx) cell.classList.add('selected');
 
-                if (val > 0) {
+                if (val === 99) {
+                    // 미스터리 상자 아이템
+                    cell.classList.add('box-item');
+                    cell.innerHTML = `
+                        <div class="item-icon">📦</div>
+                        <div class="item-name">상자</div>
+                    `;
+                } else if (val > 0) {
                     const item = stages[val - 1];
                     cell.innerHTML = `
                         <div class="item-icon">${item.icon}</div>
@@ -146,14 +169,20 @@
             document.getElementById('score').innerText = score;
             if (score > bestScore) {
                 bestScore = score;
-                localStorage.setItem('tasty_best', bestScore);
+                localStorage.setItem('tasty_best_v2', bestScore);
                 document.getElementById('best-score').innerText = bestScore;
             }
         }
 
         function handleCellClick(idx) {
+            // 만약 누른 곳이 '미스터리 상자(99)'라면 상자를 까서 하위 아이템들을 랜덤 소환!
+            if (board[idx] === 99) {
+                openBox(idx);
+                return;
+            }
+
             if (selectedIdx === null) {
-                if (board[idx] > 0) {
+                if (board[idx] > 0 && board[idx] !== 99) {
                     selectedIdx = idx;
                     updateView();
                 }
@@ -162,12 +191,9 @@
                     selectedIdx = null;
                 } else if (board[selectedIdx] === board[idx]) {
                     let currentVal = board[idx];
-                    
-                    // 🌟 대박 진화 확률 시스템 (15% 확률로 +2단계 진화!)
                     let nextVal = currentVal + 1;
                     if (Math.random() < 0.15 && currentVal < stages.length - 1) {
-                        nextVal = currentVal + 2; 
-                        // 대박 효과를 위해 간단한 알림이나 연출 대신 점수를 더 크게 부여
+                        nextVal = currentVal + 2; // 대박 진화
                     }
                     
                     board[idx] = Math.min(nextVal, stages.length);
@@ -176,12 +202,49 @@
                     selectedIdx = null;
                     
                     updateView();
-                    setTimeout(fillEmptyCells, 200);
                 } else {
-                    selectedIdx = board[idx] > 0 ? idx : null;
+                    selectedIdx = (board[idx] > 0 && board[idx] !== 99) ? idx : null;
                 }
                 updateView();
             }
+        }
+
+        // 📦 미스터리 상자를 열었을 때 동작하는 함수
+        function openBox(boxIdx) {
+            board[boxIdx] = 0; // 상자 소모
+            
+            // 주변 빈칸들 찾기 (상하좌우 또는 전체 빈칸 중 몇 개 선택)
+            let emptyIdxs = board.map((val, i) => val === 0 ? i : null).filter(v => v !== null);
+            
+            // 랜덤으로 2~4개의 하위 아이템을 빈칸에 펑펑 뱉어냄
+            let dropCount = Math.min(emptyIdxs.length, Math.floor(Math.random() * 3) + 2);
+            for (let i = 0; i < dropCount; i++) {
+                if (emptyIdxs.length === 0) break;
+                let randPosIdx = Math.floor(Math.random() * emptyIdxs.length);
+                let targetCell = emptyIdxs.splice(randPosIdx, 1)[0];
+                
+                // 하위 아이템 랜덤 결정 (1~3단계 중 확률적 등장)
+                let r = Math.random();
+                let spawnedVal = r < 0.6 ? 1 : (r < 0.9 ? 2 : 3);
+                board[targetCell] = spawnedVal;
+            }
+            
+            score += 50; // 상자 연 보상 점수
+            selectedIdx = null;
+            updateView();
+            checkGameOver();
+        }
+
+        // 버튼으로 미스터리 상자를 직접 소환하거나 빈곳에 채우기
+        function spawnMysteryBox() {
+            let emptyIdxs = board.map((val, i) => val === 0 ? i : null).filter(v => v !== null);
+            if (emptyIdxs.length === 0) {
+                checkGameOver();
+                return;
+            }
+            let target = emptyIdxs[Math.floor(Math.random() * emptyIdxs.length)];
+            board[target] = 99; // 99는 상자 아이디
+            updateView();
         }
 
         document.getElementById('board').addEventListener('click', (e) => {
@@ -196,66 +259,38 @@
             }
         });
 
-        function fillEmptyCells() {
-            let added = false;
-            for (let i = 0; i < board.length; i++) {
-                if (board[i] === 0) {
-                    // 🌟 리필될 때 1~3단계 중 랜덤하게 등장하도록 변경
-                    let randSpawn = Math.random();
-                    if (randSpawn < 0.6) board[i] = 1;       // 60% 확률로 1단계
-                    else if (randSpawn < 0.85) board[i] = 2; // 25% 확률로 2단계
-                    else board[i] = 3;                       // 15% 확률로 3단계
-                    
-                    added = true;
-                }
-            }
-            if (added) updateView();
-            checkGameOver();
-        }
-
-        function refreshBoardItems() {
-            for (let i = 0; i < board.length; i++) {
-                board[i] = Math.floor(Math.random() * 3) + 1;
-            }
-            selectedIdx = null;
-            updateView();
-        }
-
         function checkGameOver() {
             const emptyCount = board.filter(v => v === 0).length;
             if (emptyCount === 0) {
-                let canMerge = false;
-                for (let r = 0; r < 4; r++) {
-                    for (let c = 0; c < 4; c++) {
-                        let i = r * 4 + c;
-                        if (c < 3 && board[i] === board[i + 1]) canMerge = true;
-                        if (r < 3 && board[i] === board[i + 4]) canMerge = true;
-                    }
-                }
-                if (!canMerge) {
-                    document.getElementById('final-score').innerText = score;
-                    document.getElementById('game-over').style.display = 'flex';
-                }
+                document.getElementById('final-score').innerText = score;
+                document.getElementById('game-over').style.display = 'flex';
             }
         }
 
         function resetGame() {
-            board = Array(16).fill(0);
+            board = Array(TOTAL_CELLS).fill(0);
             score = 0;
             selectedIdx = null;
             document.getElementById('game-over').style.display = 'none';
-            for (let i = 0; i < board.length; i++) {
-                let randSpawn = Math.random();
-                board[i] = randSpawn < 0.7 ? 1 : (randSpawn < 0.95 ? 2 : 3);
+            initGame();
+        }
+
+        function initGame() {
+            // 처음에 일부 칸만 비워두고(약 70% 채우기), 일반 재료 및 상자 배치
+            for (let i = 0; i < TOTAL_CELLS; i++) {
+                let r = Math.random();
+                if (r < 0.55) {
+                    board[i] = Math.random() < 0.7 ? 1 : 2; // 일반 재료
+                } else if (r < 0.65) {
+                    board[i] = 99; // 미스터리 상자 배치
+                } else {
+                    board[i] = 0; // 비어있는 칸
+                }
             }
             updateView();
         }
 
-        for (let i = 0; i < board.length; i++) {
-            let randSpawn = Math.random();
-            board[i] = randSpawn < 0.7 ? 1 : (randSpawn < 0.95 ? 2 : 3);
-        }
-        updateView();
+        initGame();
     </script>
 </body>
 </html>
