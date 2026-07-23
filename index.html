@@ -5,51 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tasty Travels: 4 Teams Merge</title>
     <style>
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
-            -webkit-tap-highlight-color: transparent; 
-            touch-action: manipulation; 
-            -webkit-touch-callout: none; 
-            -webkit-user-select: none; 
-            user-select: none; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         body { background: #fdfbf7; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; height: 100dvh; padding: 12px 5px; color: #4a3b32; overflow: hidden; }
         header { text-align: center; width: 100%; position: relative; }
         h1 { font-size: 21px; color: #ff6b6b; margin-bottom: 2px; font-weight: 800; text-shadow: 1px 1px 0px #ffe3e3; }
         .version { font-size: 10px; color: #b09e93; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; }
-        
+
         .score-container { display: flex; justify-content: center; gap: 8px; width: 100%; max-width: 420px; margin-bottom: 6px; }
         .score-box { background: #fff; padding: 5px 10px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); font-size: 12px; font-weight: bold; flex: 1; text-align: center; border: 2px solid #fae1dd; }
         .score-box span { display: block; font-size: 15px; color: #ff6b6b; margin-top: 1px; }
-        
+
         /* 7 x 9 대형 보드판 그리드 */
-        .board { 
-            display: grid; 
-            grid-template-columns: repeat(7, 1fr); 
-            gap: 4px; 
-            width: 100%; 
-            max-width: 420px; 
-            aspect-ratio: 7 / 9; 
-            background: #e3d5c8; 
-            padding: 6px; 
-            border-radius: 16px; 
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.08); 
+        .board {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            width: 100%;
+            max-width: 420px;
+            aspect-ratio: 7 / 9;
+            background: #e3d5c8;
+            padding: 6px;
+            border-radius: 16px;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.08);
         }
-        
-        .cell { 
-            background: #fdf0ed; 
-            border-radius: 6px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            position: relative; 
-            box-shadow: 0 2px 0 #d7c4b7; 
-            border: 2px solid transparent; 
-            transition: transform 0.1s ease, background-color 0.1s ease; 
+
+        .cell {
+            background: #fdf0ed;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 2px 0 #d7c4b7;
+            border: 2px solid transparent;
+            transition: transform 0.1s ease, background-color 0.1s ease;
         }
         .cell:active { transform: translateY(1px); box-shadow: 0 1px 0 #d7c4b7; }
         .cell.selected { background: #ffe3e3 !important; border: 2px solid #ff6b6b; box-shadow: 0 0 6px rgba(255,107,107,0.5); }
@@ -71,7 +71,7 @@
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.1.0 (4 Teams)</div>
+        <div class="version">v1.1.1 (Team Boxes)</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
@@ -81,8 +81,8 @@
     <div class="board" id="board"></div>
 
     <div class="controls">
-        <button onclick="spawnMysteryBox()">꾸러미 상자 열기 📦</button>
-        <p class="guide">과일, 커피, 과자, 장난감 4개 팀별로 같은 아이템을 합쳐보세요!</p>
+        <button onclick="spawnRandomBox()">팀별 꾸러미 상자 소환 📦</button>
+        <p class="guide">팀별 상자(🧺, ☕, 🍪, 🎁)를 열어 하위 아이템을 획득하세요!</p>
     </div>
 
     <div id="game-over">
@@ -109,31 +109,34 @@
             lastTouchEnd = now;
         }, false);
 
-        // 🍎 4가지 팀(엄마)별 단계별 아이템 정의
-        // 각 팀은 { team: 팀이름, tier: 단계, icon: 이모지 } 구조를 가집니다.
+        // 🍎 4가지 팀 정의 및 팀별 상자 아이콘 지정
+        const teamsConfig = {
+            fruit: { name: '과일', boxIcon: '🧺' },
+            coffee: { name: '커피', boxIcon: '☕' },
+            cookie: { name: '과자', boxIcon: '🍪' },
+            toy: { name: '장난감', boxIcon: '🎁' }
+        };
+
         const itemRegistry = [
-            // 팀 1: 과일 엄마 (복숭아 -> 사과 -> 딸기 -> 바나나 -> 대형과일왕관)
+            // 과일 팀
             { team: 'fruit', tier: 1, icon: '🍑' },
             { team: 'fruit', tier: 2, icon: '🍎' },
             { team: 'fruit', tier: 3, icon: '🍓' },
             { team: 'fruit', tier: 4, icon: '🍌' },
             { team: 'fruit', tier: 5, icon: '🍉' },
-
-            // 팀 2: 커피 엄마 (원두 -> 에스프레소 -> 라떼 -> 콜드브루 -> 황금커피잔)
+            // 커피 팀
             { team: 'coffee', tier: 1, icon: '🫘' },
             { team: 'coffee', tier: 2, icon: '☕' },
             { team: 'coffee', tier: 3, icon: '🧋' },
             { team: 'coffee', tier: 4, icon: '🧊' },
             { team: 'coffee', tier: 5, icon: '🏆' },
-
-            // 팀 3: 과자 엄마 (밀가루 -> 쿠키 -> 케이크 -> 마카롱 -> 무지개과자)
+            // 과자 팀
             { team: 'cookie', tier: 1, icon: '🌾' },
             { team: 'cookie', tier: 2, icon: '🍪' },
             { team: 'cookie', tier: 3, icon: '🍰' },
             { team: 'cookie', tier: 4, icon: '🧁' },
             { team: 'cookie', tier: 5, icon: '🏰' },
-
-            // 팀 4: 장난감 엄마 (블록 -> 인형 -> 로봇 -> 드론 -> 보물상자)
+            // 장난감 팀
             { team: 'toy', tier: 1, icon: '🧩' },
             { team: 'toy', tier: 2, icon: '🧸' },
             { team: 'toy', tier: 3, icon: '🤖' },
@@ -141,10 +144,10 @@
             { team: 'toy', tier: 5, icon: '👑' }
         ];
 
-        const TOTAL_CELLS = 7 * 9; 
-        let board = Array(TOTAL_CELLS).fill(null); // 각 칸은 아이템 객체 또는 99(상자), 혹은 null(빈칸)
+        const TOTAL_CELLS = 7 * 9;
+        let board = Array(TOTAL_CELLS).fill(null);
         let score = 0;
-        let bestScore = localStorage.getItem('tasty_best_v5') || 0;
+        let bestScore = localStorage.getItem('tasty_best_v6') || 0;
         let selectedIdx = null;
 
         document.getElementById('best-score').innerText = bestScore;
@@ -152,19 +155,20 @@
         function updateView() {
             const boardEl = document.getElementById('board');
             boardEl.innerHTML = '';
-            
-            board.forEach((item, idx) => {
+
+            board.forEach((cellData, idx) => {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
                 if (selectedIdx === idx) cell.classList.add('selected');
 
-                if (item === 99) {
+                if (cellData && cellData.isBox) {
+                    // 팀별 상자 표시 (과일바구니, 커피머신, 과자박스, 장난감박스)
                     cell.classList.add('box-item');
-                    cell.innerHTML = `<div class="item-icon">📦</div>`;
-                } else if (item !== null && item !== undefined) {
-                    cell.innerHTML = `<div class="item-icon">${item.icon}</div>`;
+                    cell.innerHTML = `<div class="item-icon">${cellData.boxIcon}</div>`;
+                } else if (cellData !== null) {
+                    cell.innerHTML = `<div class="item-icon">${cellData.icon}</div>`;
                 }
-                
+
                 cell.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     handleCellClick(idx);
@@ -176,93 +180,96 @@
             document.getElementById('score').innerText = score;
             if (score > bestScore) {
                 bestScore = score;
-                localStorage.setItem('tasty_best_v5', bestScore);
+                localStorage.setItem('tasty_best_v6', bestScore);
                 document.getElementById('best-score').innerText = bestScore;
             }
         }
 
         function handleCellClick(idx) {
-            if (board[idx] === 99) {
-                openBox(idx);
+            let cellData = board[idx];
+
+            // 상자일 경우 해당 팀의 상자 열기 실행
+            if (cellData && cellData.isBox) {
+                openBox(idx, cellData.team);
                 return;
             }
 
             if (selectedIdx === null) {
-                if (board[idx] !== null && board[idx] !== 99) {
+                if (cellData !== null) {
                     selectedIdx = idx;
                     updateView();
                 }
             } else {
+                let firstData = board[selectedIdx];
                 if (selectedIdx === idx) {
                     selectedIdx = null;
-                } else if (board[selectedIdx] !== null && board[idx] !== null && 
-                           board[selectedIdx].team === board[idx].team && 
-                           board[selectedIdx].tier === board[idx].tier) {
-                    
-                    // 같은 팀, 같은 단계일 때만 합치기 성공!
-                    let currentItem = board[idx];
-                    let nextTier = currentItem.tier + 1;
-                    
-                    // 해당 팀의 다음 단계 아이템 찾기
-                    let nextItem = itemRegistry.find(i => i.team === currentItem.team && i.tier === nextTier);
-                    
+                } else if (firstData && cellData &&
+                           !firstData.isBox && !cellData.isBox &&
+                           firstData.team === cellData.team &&
+                           firstData.tier === cellData.tier) {
+
+                    let nextTier = firstData.tier + 1;
+                    let nextItem = itemRegistry.find(i => i.team === firstData.team && i.tier === nextTier);
+
                     if (nextItem) {
-                        // 대박 진화 확률 (15% 확률로 +2단계)
-                        if (Math.random() < 0.15) {
-                            let higherItem = itemRegistry.find(i => i.team === currentItem.team && i.tier === nextTier + 1);
-                            if (higherItem) nextItem = higherItem;
-                        }
-                        board[idx] = { ...nextItem };
+                        board[idx] = { ...nextItem, isBox: false };
                         score += board[idx].tier * 50;
                     } else {
-                        // 최고 단계에 도달한 경우 점수만 대량 획득 후 소멸 또는 유지
                         score += 500;
-                        board[idx] = { ...currentItem }; 
+                        board[idx] = { ...firstData };
                     }
-                    
+
                     board[selectedIdx] = null;
                     selectedIdx = null;
                     updateView();
                 } else {
-                    selectedIdx = (board[idx] !== null && board[idx] !== 99) ? idx : null;
+                    selectedIdx = (cellData !== null && !cellData.isBox) ? idx : null;
                 }
                 updateView();
             }
         }
 
-        function openBox(boxIdx) {
-            board[boxIdx] = null; 
+        // 📦 팀별 상자 오픈 함수 (대부분 1단계, 아주 가끔 2단계 드랍)
+        function openBox(boxIdx, teamName) {
+            board[boxIdx] = null;
             let emptyIdxs = board.map((val, i) => val === null ? i : null).filter(v => v !== null);
-            
-            let dropCount = Math.min(emptyIdxs.length, Math.floor(Math.random() * 4) + 3);
+
+            let dropCount = Math.min(emptyIdxs.length, Math.floor(Math.random() * 3) + 3); // 3~5개 드랍
             for (let i = 0; i < dropCount; i++) {
                 if (emptyIdxs.length === 0) break;
                 let randPosIdx = Math.floor(Math.random() * emptyIdxs.length);
                 let targetCell = emptyIdxs.splice(randPosIdx, 1)[0];
-                
-                // 4개 팀 중 무작위 팀 선택, 1~2단계 하위 아이템 중 랜덤 드랍
-                let teams = ['fruit', 'coffee', 'cookie', 'toy'];
-                let chosenTeam = teams[Math.floor(Math.random() * teams.length)];
-                let chosenTier = Math.random() < 0.7 ? 1 : 2;
-                
-                let spawned = itemRegistry.find(i => i.team === chosenTeam && i.tier === chosenTier);
-                board[targetCell] = { ...spawned };
+
+                // 💡 요청사항: 첫단계(1티어)가 거의 나오다가, 어쩌다 한번씩(15폭 확률) 2단계 나오기
+                let spawnedTier = Math.random() < 0.85 ? 1 : 2;
+
+                let spawned = itemRegistry.find(i => i.team === teamName && i.tier === spawnedTier);
+                board[targetCell] = { ...spawned, isBox: false };
             }
-            
-            score += 100;
+
+            score += 80;
             selectedIdx = null;
             updateView();
             checkGameOver();
         }
 
-        function spawnMysteryBox() {
+        function spawnRandomBox() {
             let emptyIdxs = board.map((val, i) => val === null ? i : null).filter(v => v !== null);
             if (emptyIdxs.length === 0) {
                 checkGameOver();
                 return;
             }
             let target = emptyIdxs[Math.floor(Math.random() * emptyIdxs.length)];
-            board[target] = 99; 
+
+            // 무작위 팀 선택하여 해당 팀의 상자 생성
+            let keys = Object.keys(teamsConfig);
+            let chosenTeamKey = keys[Math.floor(Math.random() * keys.length)];
+
+            board[target] = {
+                isBox: true,
+                team: chosenTeamKey,
+                boxIcon: teamsConfig[chosenTeamKey].boxIcon
+            };
             updateView();
         }
 
@@ -295,19 +302,23 @@
         }
 
         function initGame() {
+            let teamKeys = Object.keys(teamsConfig);
             for (let i = 0; i < TOTAL_CELLS; i++) {
                 let r = Math.random();
-                if (r < 0.6) {
-                    // 초기 배치: 4개 팀 중 랜덤 팀, 1~2단계 하위 아이템
-                    let teams = ['fruit', 'coffee', 'cookie', 'toy'];
-                    let chosenTeam = teams[Math.floor(Math.random() * teams.length)];
-                    let chosenTier = Math.random() < 0.7 ? 1 : 2;
+                if (r < 0.55) {
+                    let chosenTeam = teamKeys[Math.floor(Math.random() * teamKeys.length)];
+                    let chosenTier = Math.random() < 0.85 ? 1 : 2;
                     let spawned = itemRegistry.find(item => item.team === chosenTeam && item.tier === chosenTier);
-                    board[i] = { ...spawned };
-                } else if (r < 0.7) {
-                    board[i] = 99; // 상자
+                    board[i] = { ...spawned, isBox: false };
+                } else if (r < 0.65) {
+                    let chosenTeam = teamKeys[Math.floor(Math.random() * teamKeys.length)];
+                    board[i] = {
+                        isBox: true,
+                        team: chosenTeam,
+                        boxIcon: teamsConfig[chosenTeam].boxIcon
+                    };
                 } else {
-                    board[i] = null; // 빈칸
+                    board[i] = null;
                 }
             }
             updateView();
