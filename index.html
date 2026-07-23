@@ -2,11 +2,21 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tasty Travels: Merge</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        body { background: #fff8f0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; height: 100dvh; padding: 20px 10px; color: #4a3b32; user-select: none; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            touch-action: manipulation; 
+            -webkit-touch-callout: none; /* 아이폰 터치 메뉴(복사/조절 등) 방지 */
+            -webkit-user-select: none; 
+            user-select: none; 
+        }
+        body { background: #fff8f0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; height: 100dvh; padding: 20px 10px; color: #4a3b32; overflow: hidden; }
         header { text-align: center; width: 100%; position: relative; }
         h1 { font-size: 24px; color: #ff6b6b; margin-bottom: 4px; font-weight: 800; text-shadow: 1px 1px 0px #ffe3e3; }
         .version { font-size: 11px; color: #b09e93; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
@@ -20,8 +30,8 @@
         .cell:active { transform: translateY(2px); box-shadow: 0 2px 0 #d7c4b7; }
         .cell.selected { background: #ffe3e3 !important; border: 3px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.5); }
         
-        .item-icon { font-size: 32px; line-height: 1; margin-bottom: 4px; }
-        .item-name { font-size: 10px; font-weight: bold; color: #7a6558; background: rgba(255,255,255,0.7); padding: 1px 6px; border-radius: 6px; }
+        .item-icon { font-size: 32px; line-height: 1; margin-bottom: 4px; pointer-events: none; }
+        .item-name { font-size: 10px; font-weight: bold; color: #7a6558; background: rgba(255,255,255,0.7); padding: 1px 6px; border-radius: 6px; pointer-events: none; }
 
         .controls { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
         button { width: 100%; padding: 14px; font-size: 16px; font-weight: bold; border: none; border-radius: 16px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 5px 0 #d94848; transition: all 0.1s; }
@@ -38,7 +48,7 @@
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.0.3</div>
+        <div class="version">v1.0.4</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
@@ -98,7 +108,16 @@
                     `;
                 }
                 
-                cell.onclick = () => handleCellClick(idx);
+                // 터치 즉시 반응하도록 touchend 이벤트 활용 및 기본 확대 동작 방지
+                cell.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    handleCellClick(idx);
+                });
+                // PC 환경 테스트를 위한 click 이벤트 호환
+                cell.onclick = () => {
+                    // 터치가 지원되는 기기에서는 touchend가 먼저 실행되므로 중복 실행 방지
+                };
+
                 boardEl.appendChild(cell);
             });
 
@@ -110,26 +129,7 @@
             }
         }
 
-        function fillEmptyCells() {
-            let added = false;
-            for (let i = 0; i < board.length; i++) {
-                if (board[i] === 0) {
-                    board[i] = 1;
-                    added = true;
-                }
-            }
-            if (added) updateView();
-            checkGameOver();
-        }
-
-        function refreshBoardItems() {
-            for (let i = 0; i < board.length; i++) {
-                board[i] = Math.floor(Math.random() * 3) + 1;
-            }
-            selectedIdx = null;
-            updateView();
-        }
-
+        // PC 환경을 위해 기존 click 핸들러도 안전하게 작동하도록 보완
         function handleCellClick(idx) {
             if (selectedIdx === null) {
                 if (board[idx] > 0) {
@@ -152,6 +152,41 @@
                 }
                 updateView();
             }
+        }
+
+        // PC 클릭용 별도 연결
+        document.getElementById('board').addEventListener('click', (e) => {
+            const cellEl = e.target.closest('.cell');
+            if (!cellEl) return;
+            const cells = Array.from(document.getElementById('board').children);
+            const idx = cells.indexOf(cellEl);
+            if (idx !== -1) {
+                // 모바일 터치 환경이 아닐 때만 click으로 처리
+                // (모바일은 touchend에서 이미 처리됨)
+                if (!('ontouchstart' in window)) {
+                    handleCellClick(idx);
+                }
+            }
+        });
+
+        function fillEmptyCells() {
+            let added = false;
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === 0) {
+                    board[i] = 1;
+                    added = true;
+                }
+            }
+            if (added) updateView();
+            checkGameOver();
+        }
+
+        function refreshBoardItems() {
+            for (let i = 0; i < board.length; i++) {
+                board[i] = Math.floor(Math.random() * 3) + 1;
+            }
+            selectedIdx = null;
+            updateView();
         }
 
         function checkGameOver() {
