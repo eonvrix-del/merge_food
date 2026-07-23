@@ -45,14 +45,14 @@
     <div class="board" id="board"></div>
 
     <div class="controls">
-        <button onclick="spawnItem()">재료 상자 열기 📦</button>
-        <p class="guide">같은 요리를 두 번 터치해서 합쳐보세요!</p>
+        <button onclick="refreshBoardItems()">재료 새로고침 🔄</button>
+        <p class="guide">같은 요리를 터치해 합치면 새로운 재료가 자동 리필돼요!</p>
     </div>
 
     <div id="game-over">
         <div class="modal-content">
             <h2>Game Over! 😢</h2>
-            <p>보드판이 꽉 찼습니다!<br>최종 점수: <span id="final-score" style="font-weight:bold; color:#ff6b6b;">0</span>점</p>
+            <p>더 이상 합칠 수 없습니다!<br>최종 점수: <span id="final-score" style="font-weight:bold; color:#ff6b6b;">0</span>점</p>
             <button onclick="resetGame()">다시 시작하기</button>
         </div>
     </div>
@@ -106,19 +106,26 @@
             }
         }
 
-        function spawnItem() {
-            const emptyIdxs = board.map((val, idx) => val === 0 ? idx : null).filter(val => val !== null);
-            if (emptyIdxs.length === 0) {
-                checkGameOver();
-                return;
+        // 빈 칸에 1단계(물) 재료를 채워넣는 함수
+        function fillEmptyCells() {
+            let added = false;
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === 0) {
+                    board[i] = 1; // 1단계 재료 자동 생성
+                    added = true;
+                }
             }
-            const randomIdx = emptyIdxs[Math.floor(Math.random() * emptyIdxs.length)];
-            board[randomIdx] = 1; // 1단계(물) 생성
+            if (added) updateView();
+            checkGameOver();
+        }
+
+        // 버튼 기능: 배치된 재료들을 무작위 1~3단계 재료로 싹 섞어줌(새로고침)
+        function refreshBoardItems() {
+            for (let i = 0; i < board.length; i++) {
+                board[i] = Math.floor(Math.random() * 3) + 1; // 1~3단계 중 랜덤
+            }
+            selectedIdx = null;
             updateView();
-            
-            if (board.filter(v => v === 0).length === 0) {
-                checkGameOver();
-            }
         }
 
         function handleCellClick(idx) {
@@ -134,9 +141,13 @@
                     // 머지 성공!
                     board[idx] = Math.min(board[idx] + 1, stages.length);
                     score += board[idx] * 20;
-                    board[selectedIdx] = 0;
+                    board[selectedIdx] = 0; // 기존 자리는 비우고
                     selectedIdx = null;
+                    
                     updateView();
+                    
+                    // 합쳐져서 빈칸이 생기면 곧바로 새로운 재료 리필
+                    setTimeout(fillEmptyCells, 200);
                 } else {
                     // 다른 아이템을 누르면 선택 전환
                     selectedIdx = board[idx] > 0 ? idx : null;
@@ -146,11 +157,22 @@
         }
 
         function checkGameOver() {
-            const emptyIdxs = board.filter(v => v === 0);
-            if (emptyIdxs.length === 0) {
-                // 인접한 같은 칸이 있는지 체크하는 로직 생략 후 단순 빈칸 여부로 판단
-                document.getElementById('final-score').innerText = score;
-                document.getElementById('game-over').style.display = 'flex';
+            // 빈 칸이 전혀 없고, 인접한 곳에 합칠 수 있는 쌍이 없는지 체크 (간단히 빈칸 유무로 판단)
+            const emptyCount = board.filter(v => v === 0).length;
+            if (emptyCount === 0) {
+                // 추가로 인접한 같은 아이템이 있는지 검사
+                let canMerge = false;
+                for (let r = 0; r < 4; r++) {
+                    for (let c = 0; c < 4; c++) {
+                        let i = r * 4 + c;
+                        if (c < 3 && board[i] === board[i + 1]) canMerge = true;
+                        if (r < 3 && board[i] === board[i + 4]) canMerge = true;
+                    }
+                }
+                if (!canMerge) {
+                    document.getElementById('final-score').innerText = score;
+                    document.getElementById('game-over').style.display = 'flex';
+                }
             }
         }
 
@@ -159,13 +181,18 @@
             score = 0;
             selectedIdx = null;
             document.getElementById('game-over').style.display = 'none';
-            spawnItem();
-            spawnItem();
+            // 처음 시작할 때 보드를 가득 채움
+            for (let i = 0; i < board.length; i++) {
+                board[i] = Math.random() < 0.7 ? 1 : 2; // 1~2단계로 가득 채우기
+            }
+            updateView();
         }
 
-        // 초기 시작 아이템 2개 제공
-        spawnItem();
-        spawnItem();
+        // 최초 실행 시 보드를 가득 채우고 시작
+        for (let i = 0; i < board.length; i++) {
+            board[i] = Math.random() < 0.7 ? 1 : 2;
+        }
+        updateView();
     </script>
 </body>
 </html>
