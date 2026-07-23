@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Tasty Travels: Merge</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; -webkit-tap-highlight-color: transparent; }
+        /* touch-action: manipulation을 추가하여 모바일 브라우저의 더블탭 확대/제스처 지연을 방지합니다 */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         body { background: #fff8f0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; height: 100dvh; padding: 20px 10px; color: #4a3b32; user-select: none; }
         header { text-align: center; width: 100%; }
         h1 { font-size: 24px; color: #ff6b6b; margin-bottom: 8px; font-weight: 800; text-shadow: 1px 1px 0px #ffe3e3; }
@@ -94,6 +95,8 @@
                         <div class="item-name">${item.name}</div>
                     `;
                 }
+                
+                // 터치 반응 속도를 높이기 위해 touchend와 click 동시 대응 또는 기본 이벤트 최적화
                 cell.onclick = () => handleCellClick(idx);
                 boardEl.appendChild(cell);
             });
@@ -106,12 +109,11 @@
             }
         }
 
-        // 빈 칸에 1단계(물) 재료를 채워넣는 함수
         function fillEmptyCells() {
             let added = false;
             for (let i = 0; i < board.length; i++) {
                 if (board[i] === 0) {
-                    board[i] = 1; // 1단계 재료 자동 생성
+                    board[i] = 1;
                     added = true;
                 }
             }
@@ -119,10 +121,9 @@
             checkGameOver();
         }
 
-        // 버튼 기능: 배치된 재료들을 무작위 1~3단계 재료로 싹 섞어줌(새로고침)
         function refreshBoardItems() {
             for (let i = 0; i < board.length; i++) {
-                board[i] = Math.floor(Math.random() * 3) + 1; // 1~3단계 중 랜덤
+                board[i] = Math.floor(Math.random() * 3) + 1;
             }
             selectedIdx = null;
             updateView();
@@ -136,20 +137,16 @@
                 }
             } else {
                 if (selectedIdx === idx) {
-                    selectedIdx = null; // 선택 해제
+                    selectedIdx = null;
                 } else if (board[selectedIdx] === board[idx]) {
-                    // 머지 성공!
                     board[idx] = Math.min(board[idx] + 1, stages.length);
                     score += board[idx] * 20;
-                    board[selectedIdx] = 0; // 기존 자리는 비우고
+                    board[selectedIdx] = 0;
                     selectedIdx = null;
                     
                     updateView();
-                    
-                    // 합쳐져서 빈칸이 생기면 곧바로 새로운 재료 리필
                     setTimeout(fillEmptyCells, 200);
                 } else {
-                    // 다른 아이템을 누르면 선택 전환
                     selectedIdx = board[idx] > 0 ? idx : null;
                 }
                 updateView();
@@ -157,10 +154,8 @@
         }
 
         function checkGameOver() {
-            // 빈 칸이 전혀 없고, 인접한 곳에 합칠 수 있는 쌍이 없는지 체크 (간단히 빈칸 유무로 판단)
             const emptyCount = board.filter(v => v === 0).length;
             if (emptyCount === 0) {
-                // 추가로 인접한 같은 아이템이 있는지 검사
                 let canMerge = false;
                 for (let r = 0; r < 4; r++) {
                     for (let c = 0; c < 4; c++) {
@@ -181,14 +176,12 @@
             score = 0;
             selectedIdx = null;
             document.getElementById('game-over').style.display = 'none';
-            // 처음 시작할 때 보드를 가득 채움
             for (let i = 0; i < board.length; i++) {
-                board[i] = Math.random() < 0.7 ? 1 : 2; // 1~2단계로 가득 채우기
+                board[i] = Math.random() < 0.7 ? 1 : 2;
             }
             updateView();
         }
 
-        // 최초 실행 시 보드를 가득 채우고 시작
         for (let i = 0; i < board.length; i++) {
             board[i] = Math.random() < 0.7 ? 1 : 2;
         }
