@@ -11,7 +11,7 @@
             padding: 0;
             font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
+            touch-action: none;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
@@ -128,7 +128,14 @@
                 e.preventDefault();
             }
             lastTouchEnd = now;
-        }, false);
+        }, { passive: false });
+
+        // iOS Safari 전용 핀치 확대 제스처 차단 (touch-action만으로는 일부 기기에서 새지 않음)
+        ['gesturestart', 'gesturechange', 'gestureend'].forEach(function(evt) {
+            document.addEventListener(evt, function(e) {
+                e.preventDefault();
+            }, { passive: false });
+        });
 
         // 🍎 4가지 팀 정의 및 팀별 상자 아이콘 지정
         const teamsConfig = {
