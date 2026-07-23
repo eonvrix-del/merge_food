@@ -27,7 +27,6 @@
         
         .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; aspect-ratio: 1; background: #e3d5c8; padding: 12px; border-radius: 20px; box-shadow: inset 0 4px 8px rgba(0,0,0,0.08); }
         
-        /* 핵심: 평소에도 동일한 두께의 투명 테두리를 주어 선택될 때 크기가 변해 밀리는 현상을 원천 방지합니다 */
         .cell { 
             background: #fdf0ed; 
             border-radius: 14px; 
@@ -52,7 +51,6 @@
         button:active { transform: translateY(3px); box-shadow: 0 2px 0 #d94848; }
         .guide { font-size: 12px; color: #8c7365; text-align: center; margin-top: 4px; }
 
-        /* 게임오버 모달 */
         #game-over { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 10; }
         .modal-content { background: #fff; padding: 30px; border-radius: 24px; text-align: center; width: 80%; max-width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-content h2 { color: #ff6b6b; margin-bottom: 10px; font-size: 22px; }
@@ -62,7 +60,7 @@
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.0.5</div>
+        <div class="version">v1.0.6</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
@@ -73,7 +71,7 @@
 
     <div class="controls">
         <button onclick="refreshBoardItems()">재료 새로고침 🔄</button>
-        <p class="guide">같은 요리를 터치해 합치면 새로운 재료가 자동 리필돼요!</p>
+        <p class="guide">랜덤 대박 진화와 리필 시스템이 적용되었습니다!</p>
     </div>
 
     <div id="game-over">
@@ -85,7 +83,6 @@
     </div>
 
     <script>
-        // 두 손가락 터치(핀치 줌)로 인한 화면 확대 원천 차단
         document.addEventListener('touchstart', function(e) {
             if (e.touches.length > 1) {
                 e.preventDefault();
@@ -96,7 +93,7 @@
         document.addEventListener('touchend', function(e) {
             const now = (new Date()).getTime();
             if (now - lastTouchEnd <= 300) {
-                e.preventDefault(); // 더블 탭 확대 방지
+                e.preventDefault();
             }
             lastTouchEnd = now;
         }, false);
@@ -164,8 +161,17 @@
                 if (selectedIdx === idx) {
                     selectedIdx = null;
                 } else if (board[selectedIdx] === board[idx]) {
-                    board[idx] = Math.min(board[idx] + 1, stages.length);
-                    score += board[idx] * 20;
+                    let currentVal = board[idx];
+                    
+                    // 🌟 대박 진화 확률 시스템 (15% 확률로 +2단계 진화!)
+                    let nextVal = currentVal + 1;
+                    if (Math.random() < 0.15 && currentVal < stages.length - 1) {
+                        nextVal = currentVal + 2; 
+                        // 대박 효과를 위해 간단한 알림이나 연출 대신 점수를 더 크게 부여
+                    }
+                    
+                    board[idx] = Math.min(nextVal, stages.length);
+                    score += board[idx] * 30;
                     board[selectedIdx] = 0;
                     selectedIdx = null;
                     
@@ -194,7 +200,12 @@
             let added = false;
             for (let i = 0; i < board.length; i++) {
                 if (board[i] === 0) {
-                    board[i] = 1;
+                    // 🌟 리필될 때 1~3단계 중 랜덤하게 등장하도록 변경
+                    let randSpawn = Math.random();
+                    if (randSpawn < 0.6) board[i] = 1;       // 60% 확률로 1단계
+                    else if (randSpawn < 0.85) board[i] = 2; // 25% 확률로 2단계
+                    else board[i] = 3;                       // 15% 확률로 3단계
+                    
                     added = true;
                 }
             }
@@ -234,13 +245,15 @@
             selectedIdx = null;
             document.getElementById('game-over').style.display = 'none';
             for (let i = 0; i < board.length; i++) {
-                board[i] = Math.random() < 0.7 ? 1 : 2;
+                let randSpawn = Math.random();
+                board[i] = randSpawn < 0.7 ? 1 : (randSpawn < 0.95 ? 2 : 3);
             }
             updateView();
         }
 
         for (let i = 0; i < board.length; i++) {
-            board[i] = Math.random() < 0.7 ? 1 : 2;
+            let randSpawn = Math.random();
+            board[i] = randSpawn < 0.7 ? 1 : (randSpawn < 0.95 ? 2 : 3);
         }
         updateView();
     </script>
