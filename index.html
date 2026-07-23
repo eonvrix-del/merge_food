@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tasty Travels: Merge</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', sans-serif; }
+body { background: #fdfbf7; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; padding: 20px 10px; color: #333; }
+header { text-align: center; width: 100%; margin-bottom: 10px; }
+h1 { font-size: 22px; color: #ff6b6b; margin-bottom: 5px; }
+.score-board { font-size: 16px; font-weight: bold; background: #fff; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: inline-block; }
+.board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 360px; aspect-ratio: 1; background: #e0dcd0; padding: 10px; border-radius: 12px; }
+.cell { background: #f4f0e6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; user-select: none; transition: transform 0.1s; position: relative; }
+.cell:active { transform: scale(0.95); }
+.controls { width: 100%; max-width: 360px; display: flex; gap: 10px; margin-top: 10px; }
+button { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 4px 6px rgba(255,107,107,0.3); }
+button:active { background: #fa5252; }
+.guide { font-size: 12px; color: #777; text-align: center; margin-top: 5px; }
+</style>
+</head>
+<body>
+<header>
+<h1>✈️ Tasty Travels</h1>
+<div class="score-board">점수: <span id="score">0</span></div>
+</header>
+
+<div class="board" id="board"></div>
+
+<div style="width: 100%; max-width: 360px;">
+<div class="controls">
+<button onclick="spawnItem()">재료 상자 열기 📦</button>
+</div>
+<p class="guide">같은 요리를 드래그하거나 클릭해서 합쳐보세요!</p>
+</div>
+
+<script>
+const items = ['💧', '🌾', '🍞', '🧀', '🍳', '🍔', '🍕', '🍰', '👑'];
+let board = Array(16).fill(0);
+let score = 0;
+let selectedIdx = null;
+
+function updateView() {
+const boardEl = document.getElementById('board');
+boardEl.innerHTML = '';
+board.forEach((val, idx) => {
+const cell = document.createElement('div');
+cell.className = 'cell';
+if (val > 0) {
+cell.innerText = items[val - 1];
+if (selectedIdx === idx) cell.style.border = '3px solid #ff6b6b';
+}
+cell.onclick = () => handleCellClick(idx);
+boardEl.appendChild(cell);
+});
+document.getElementById('score').innerText = score;
+}
+
+function spawnItem() {
+const emptyIdxs = board.map((val, idx) => val === 0 ? idx : null).filter(val => val !== null);
+if (emptyIdxs.length === 0) {
+alert('자리가 부족합니다!');
+return;
+}
+const randomIdx = emptyIdxs[Math.floor(Math.random() * emptyIdxs.length)];
+board[randomIdx] = 1; // 기본 재료(물/밀 등) 생성
+updateView();
+}
+
+function handleCellClick(idx) {
+if (selectedIdx === null) {
+if (board[idx] > 0) {
+selectedIdx = idx;
+updateView();
+}
+} else {
+if (selectedIdx === idx) {
+selectedIdx = null; // 취소
+} else if (board[selectedIdx] === board[idx]) {
+// 같은 아이템 합치기
+board[idx] = board[idx] + 1;
+score += board[idx] * 10;
+board[selectedIdx] = 0;
+selectedIdx = null;
+} else {
+// 다른 아이템이면 선택 이동
+selectedIdx = board[idx] > 0 ? idx : null;
+}
+updateView();
+}
+}
+
+// 초기 시작 아이템 2개 제공
+spawnItem();
+spawnItem();
+</script>
+</body>
+</html>
