@@ -50,6 +50,7 @@
             box-shadow: 0 2px 0 #d7c4b7;
             border: 2px solid transparent;
             transition: transform 0.1s ease, background-color 0.1s ease;
+            touch-action: none;
         }
         .cell:active { transform: translateY(1px); box-shadow: 0 1px 0 #d7c4b7; }
         .cell.selected { background: #ffe3e3 !important; border: 2px solid #ff6b6b; box-shadow: 0 0 6px rgba(255,107,107,0.5); }
@@ -58,10 +59,25 @@
         .cell.box-item.box-coffee { background: #ecdfd2; border-color: #8a5a3b; }
         .cell.box-item.box-cookie { background: #fff0cf; border-color: #e0a83e; }
         .cell.box-item.box-toy { background: #e2f0ff; border-color: #5b9bd5; }
+        .cell.box-item.empty { opacity: 0.55; }
 
         .item-icon { font-size: 26px; line-height: 1; pointer-events: none; }
-        .box-item .item-icon { font-size: 22px; }
-        .box-label { font-size: 7px; font-weight: bold; line-height: 1.1; color: #6b5642; pointer-events: none; white-space: nowrap; }
+        .box-item .item-icon { font-size: 20px; pointer-events: none; }
+        .box-label { font-size: 6.5px; font-weight: bold; line-height: 1.1; color: #6b5642; pointer-events: none; white-space: nowrap; }
+        .box-count {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #ff6b6b;
+            color: #fff;
+            font-size: 8px;
+            font-weight: 800;
+            border-radius: 7px;
+            padding: 0 3px;
+            line-height: 1.4;
+            pointer-events: none;
+        }
+        .cell.box-item.empty .box-count { background: #9a9a9a; }
 
         .controls { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 5px; }
         button { width: 100%; padding: 11px; font-size: 14px; font-weight: bold; border: none; border-radius: 12px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 4px 0 #d94848; transition: all 0.1s; }
@@ -77,7 +93,7 @@
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.1.2 (Distinct Boxes)</div>
+        <div class="version">v1.2.0 (Box Dispenser)</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
@@ -87,8 +103,7 @@
     <div class="board" id="board"></div>
 
     <div class="controls">
-        <button onclick="spawnRandomBox()">팀별 꾸러미 상자 소환 📦</button>
-        <p class="guide">과일바구니🧺, 커피머신⚙️, 과자상자📦, 장난감상자🎁를 열어 하위 아이템을 획득하세요!</p>
+        <p class="guide">과일상자🧺·커피머신⚙️·과자상자📦·장난감상자🎁를 톡 터치하면 아이템이 1개 나와요! 상자는 10개까지 채워지고, 다 쓰면 시간이 지나며 다시 채워집니다. 상자를 꾹 눌러 드래그하면 다른 칸과 위치를 바꿀 수 있어요.</p>
     </div>
 
     <div id="game-over">
@@ -117,7 +132,7 @@
 
         // 🍎 4가지 팀 정의 및 팀별 상자 아이콘 지정
         const teamsConfig = {
-            fruit: { name: '과일', boxIcon: '🧺', boxLabel: '과일바구니' },
+            fruit: { name: '과일', boxIcon: '🧺', boxLabel: '과일상자' },
             coffee: { name: '커피', boxIcon: '⚙️', boxLabel: '커피머신' },
             cookie: { name: '과자', boxIcon: '📦', boxLabel: '과자상자' },
             toy: { name: '장난감', boxIcon: '🎁', boxLabel: '장난감상자' }
@@ -151,10 +166,15 @@
         ];
 
         const TOTAL_CELLS = 7 * 9;
+        const BOX_MAX_CHARGES = 10;
+        const REGEN_INTERVAL_MS = 8000; // 8초마다 1개씩 자동 충전
+        const DRAG_THRESHOLD = 12; // 이 이상 움직이면 탭이 아니라 드래그로 판정
+
         let board = Array(TOTAL_CELLS).fill(null);
         let score = 0;
-        let bestScore = localStorage.getItem('tasty_best_v6') || 0;
+        let bestScore = localStorage.getItem('tasty_best_v7') || 0;
         let selectedIdx = null;
+        let dragState = null; // { idx, x, y }
 
         document.getElementById('best-score').innerText = bestScore;
 
@@ -168,16 +188,20 @@
                 if (selectedIdx === idx) cell.classList.add('selected');
 
                 if (cellData && cellData.isBox) {
-                    // 팀별 상자 표시 (과일바구니, 커피머신, 과자상자, 장난감상자)
+                    // 팀별 상자 표시 (과일상자, 커피머신, 과자상자, 장난감상자)
                     cell.classList.add('box-item', `box-${cellData.team}`);
-                    cell.innerHTML = `<div class="item-icon">${cellData.boxIcon}</div><div class="box-label">${cellData.boxLabel}</div>`;
+                    if (cellData.charges <= 0) cell.classList.add('empty');
+                    cell.innerHTML = `
+                        <div class="item-icon">${cellData.boxIcon}</div>
+                        <div class="box-label">${cellData.boxLabel}</div>
+                        <div class="box-count">${cellData.charges}/${cellData.maxCharges}</div>
+                    `;
                 } else if (cellData !== null) {
                     cell.innerHTML = `<div class="item-icon">${cellData.icon}</div>`;
                 }
 
-                cell.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    handleCellClick(idx);
+                cell.addEventListener('pointerdown', (e) => {
+                    dragState = { idx, x: e.clientX, y: e.clientY };
                 });
 
                 boardEl.appendChild(cell);
@@ -186,17 +210,54 @@
             document.getElementById('score').innerText = score;
             if (score > bestScore) {
                 bestScore = score;
-                localStorage.setItem('tasty_best_v6', bestScore);
+                localStorage.setItem('tasty_best_v7', bestScore);
                 document.getElementById('best-score').innerText = bestScore;
             }
+        }
+
+        // 탭(짧게 터치)과 드래그(이동 후 놓기)를 구분해서 처리
+        document.addEventListener('pointerup', (e) => {
+            if (!dragState) return;
+            const { idx: fromIdx, x: startX, y: startY } = dragState;
+            dragState = null;
+
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < DRAG_THRESHOLD) {
+                handleCellClick(fromIdx);
+                return;
+            }
+
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            const cellEl = el ? el.closest('.cell') : null;
+            if (!cellEl) return;
+            const cells = Array.from(document.getElementById('board').children);
+            const toIdx = cells.indexOf(cellEl);
+            if (toIdx === -1 || toIdx === fromIdx) return;
+
+            handleDragSwap(fromIdx, toIdx);
+        });
+
+        // 상자(또는 상자와 인접한 칸)를 드래그하면 서로 자리를 맞바꿈 (합치기 아님)
+        function handleDragSwap(fromIdx, toIdx) {
+            const fromCell = board[fromIdx];
+            const toCell = board[toIdx];
+            if (!(fromCell && fromCell.isBox) && !(toCell && toCell.isBox)) return;
+
+            board[fromIdx] = toCell;
+            board[toIdx] = fromCell;
+            selectedIdx = null;
+            updateView();
         }
 
         function handleCellClick(idx) {
             let cellData = board[idx];
 
-            // 상자일 경우 해당 팀의 상자 열기 실행
+            // 상자일 경우 터치할 때마다 아이템 1개 배출
             if (cellData && cellData.isBox) {
-                openBox(idx, cellData.team);
+                dispenseFromBox(idx);
                 return;
             }
 
@@ -235,62 +296,50 @@
             }
         }
 
-        // 📦 팀별 상자 오픈 함수 (대부분 1단계, 아주 가끔 2단계 드랍)
-        function openBox(boxIdx, teamName) {
-            board[boxIdx] = null;
-            let emptyIdxs = board.map((val, i) => val === null ? i : null).filter(v => v !== null);
+        // 📦 상자를 터치할 때마다 아이템 1개씩 배출 (대부분 1단계, 가끔 2단계)
+        function dispenseFromBox(boxIdx) {
+            const box = board[boxIdx];
+            if (!box || box.charges <= 0) return;
 
-            let dropCount = Math.min(emptyIdxs.length, Math.floor(Math.random() * 3) + 3); // 3~5개 드랍
-            for (let i = 0; i < dropCount; i++) {
-                if (emptyIdxs.length === 0) break;
-                let randPosIdx = Math.floor(Math.random() * emptyIdxs.length);
-                let targetCell = emptyIdxs.splice(randPosIdx, 1)[0];
-
-                // 💡 요청사항: 첫단계(1티어)가 거의 나오다가, 어쩌다 한번씩(15폭 확률) 2단계 나오기
-                let spawnedTier = Math.random() < 0.85 ? 1 : 2;
-
-                let spawned = itemRegistry.find(i => i.team === teamName && i.tier === spawnedTier);
-                board[targetCell] = { ...spawned, isBox: false };
-            }
-
-            score += 80;
-            selectedIdx = null;
-            updateView();
-            checkGameOver();
-        }
-
-        function spawnRandomBox() {
             let emptyIdxs = board.map((val, i) => val === null ? i : null).filter(v => v !== null);
             if (emptyIdxs.length === 0) {
                 checkGameOver();
                 return;
             }
             let target = emptyIdxs[Math.floor(Math.random() * emptyIdxs.length)];
+            let spawnedTier = Math.random() < 0.85 ? 1 : 2;
+            let spawned = itemRegistry.find(i => i.team === box.team && i.tier === spawnedTier);
+            board[target] = { ...spawned, isBox: false };
 
-            // 무작위 팀 선택하여 해당 팀의 상자 생성
-            let keys = Object.keys(teamsConfig);
-            let chosenTeamKey = keys[Math.floor(Math.random() * keys.length)];
+            box.charges -= 1;
+            if (box.charges <= 0) {
+                box.charges = 0;
+                box.nextRegenAt = Date.now() + REGEN_INTERVAL_MS;
+            }
 
-            board[target] = {
-                isBox: true,
-                team: chosenTeamKey,
-                boxIcon: teamsConfig[chosenTeamKey].boxIcon,
-                boxLabel: teamsConfig[chosenTeamKey].boxLabel
-            };
+            score += 10;
+            selectedIdx = null;
             updateView();
+            checkGameOver();
         }
 
-        document.getElementById('board').addEventListener('click', (e) => {
-            const cellEl = e.target.closest('.cell');
-            if (!cellEl) return;
-            const cells = Array.from(document.getElementById('board').children);
-            const idx = cells.indexOf(cellEl);
-            if (idx !== -1) {
-                if (!('ontouchstart' in window)) {
-                    handleCellClick(idx);
+        // 상자 충전: 최대치 미만이면 일정 시간마다 1개씩 자동으로 채움
+        function regenTick() {
+            const now = Date.now();
+            let changed = false;
+            board.forEach(cell => {
+                if (cell && cell.isBox && cell.charges < cell.maxCharges) {
+                    if (!cell.nextRegenAt) cell.nextRegenAt = now + REGEN_INTERVAL_MS;
+                    if (now >= cell.nextRegenAt) {
+                        cell.charges = Math.min(cell.maxCharges, cell.charges + 1);
+                        cell.nextRegenAt = cell.charges < cell.maxCharges ? now + REGEN_INTERVAL_MS : null;
+                        changed = true;
+                    }
                 }
-            }
-        });
+            });
+            if (changed) updateView();
+        }
+        setInterval(regenTick, 1000);
 
         function checkGameOver() {
             const emptyCount = board.filter(v => v === null).length;
@@ -309,26 +358,36 @@
         }
 
         function initGame() {
-            let teamKeys = Object.keys(teamsConfig);
+            board = Array(TOTAL_CELLS).fill(null);
+            const teamKeys = Object.keys(teamsConfig);
+
+            // 1. 초기 아이템을 무작위로 배치 (일부는 빈 칸으로 남김)
             for (let i = 0; i < TOTAL_CELLS; i++) {
-                let r = Math.random();
-                if (r < 0.55) {
+                if (Math.random() < 0.45) {
                     let chosenTeam = teamKeys[Math.floor(Math.random() * teamKeys.length)];
                     let chosenTier = Math.random() < 0.85 ? 1 : 2;
                     let spawned = itemRegistry.find(item => item.team === chosenTeam && item.tier === chosenTier);
                     board[i] = { ...spawned, isBox: false };
-                } else if (r < 0.65) {
-                    let chosenTeam = teamKeys[Math.floor(Math.random() * teamKeys.length)];
-                    board[i] = {
-                        isBox: true,
-                        team: chosenTeam,
-                        boxIcon: teamsConfig[chosenTeam].boxIcon,
-                        boxLabel: teamsConfig[chosenTeam].boxLabel
-                    };
-                } else {
-                    board[i] = null;
                 }
             }
+
+            // 2. 게임마다 팀별 상자를 종류별로 1개씩, 빈 칸 중 무작위 위치에 배치
+            let emptyIdxs = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+            teamKeys.forEach(team => {
+                if (emptyIdxs.length === 0) return;
+                let randPos = Math.floor(Math.random() * emptyIdxs.length);
+                let cellIdx = emptyIdxs.splice(randPos, 1)[0];
+                board[cellIdx] = {
+                    isBox: true,
+                    team,
+                    boxIcon: teamsConfig[team].boxIcon,
+                    boxLabel: teamsConfig[team].boxLabel,
+                    charges: BOX_MAX_CHARGES,
+                    maxCharges: BOX_MAX_CHARGES,
+                    nextRegenAt: null
+                };
+            });
+
             updateView();
         }
 
