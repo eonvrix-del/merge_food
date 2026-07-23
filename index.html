@@ -42,6 +42,7 @@
         .board {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(9, 1fr);
             gap: 4px;
             width: 100%;
             max-width: 420px;
@@ -74,8 +75,8 @@
         .cell.box-item.box-toy { background: #e2f0ff; border-color: #5b9bd5; }
         .cell.box-item.empty { opacity: 0.55; }
 
-        .item-icon { font-size: 26px; line-height: 1; pointer-events: none; }
-        .box-item .item-icon { font-size: 20px; pointer-events: none; }
+        .item-icon { font-size: 32px; line-height: 1; pointer-events: none; }
+        .box-item .item-icon { font-size: 26px; pointer-events: none; }
         .box-label { font-size: 6.5px; font-weight: bold; line-height: 1.1; color: #6b5642; pointer-events: none; white-space: nowrap; }
         .box-count {
             position: absolute;
@@ -106,7 +107,7 @@
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.3.0 (Goals & Stages)</div>
+        <div class="version">v1.3.1 (Bigger Icons, Even Rows)</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
@@ -205,7 +206,7 @@
 
         const TOTAL_CELLS = 7 * 9;
         const BOX_MAX_CHARGES = 10;
-        const REGEN_INTERVAL_MS = 8000; // 8초마다 1개씩 자동 충전
+        const REGEN_INTERVAL_MS = 20000; // 20초마다 1개씩 자동 충전
         const DRAG_THRESHOLD = 12; // 이 이상 움직이면 탭이 아니라 드래그로 판정
 
         const GOAL_SLOTS = 5;
