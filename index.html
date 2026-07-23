@@ -1,98 +1,171 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Tasty Travels: Merge</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', sans-serif; }
-body { background: #fdfbf7; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; padding: 20px 10px; color: #333; }
-header { text-align: center; width: 100%; margin-bottom: 10px; }
-h1 { font-size: 22px; color: #ff6b6b; margin-bottom: 5px; }
-.score-board { font-size: 16px; font-weight: bold; background: #fff; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: inline-block; }
-.board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 360px; aspect-ratio: 1; background: #e0dcd0; padding: 10px; border-radius: 12px; }
-.cell { background: #f4f0e6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; user-select: none; transition: transform 0.1s; position: relative; }
-.cell:active { transform: scale(0.95); }
-.controls { width: 100%; max-width: 360px; display: flex; gap: 10px; margin-top: 10px; }
-button { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 4px 6px rgba(255,107,107,0.3); }
-button:active { background: #fa5252; }
-.guide { font-size: 12px; color: #777; text-align: center; margin-top: 5px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tasty Travels: Merge</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #fff8f0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; height: 100dvh; padding: 20px 10px; color: #4a3b32; user-select: none; }
+        header { text-align: center; width: 100%; }
+        h1 { font-size: 24px; color: #ff6b6b; margin-bottom: 8px; font-weight: 800; text-shadow: 1px 1px 0px #ffe3e3; }
+        .score-container { display: flex; justify-content: center; gap: 15px; width: 100%; max-width: 380px; margin-bottom: 10px; }
+        .score-box { background: #fff; padding: 8px 16px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 14px; font-weight: bold; flex: 1; text-align: center; border: 2px solid #fae1dd; }
+        .score-box span { display: block; font-size: 18px; color: #ff6b6b; margin-top: 2px; }
+        
+        .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; aspect-ratio: 1; background: #e3d5c8; padding: 12px; border-radius: 20px; box-shadow: inset 0 4px 8px rgba(0,0,0,0.08); }
+        .cell { background: #fdf0ed; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; box-shadow: 0 4px 0 #d7c4b7; transition: all 0.1s ease; }
+        .cell:active { transform: translateY(2px); box-shadow: 0 2px 0 #d7c4b7; }
+        .cell.selected { background: #ffe3e3 !important; border: 3px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.5); }
+        
+        .item-icon { font-size: 32px; line-height: 1; margin-bottom: 4px; }
+        .item-name { font-size: 10px; font-weight: bold; color: #7a6558; background: rgba(255,255,255,0.7); padding: 1px 6px; border-radius: 6px; }
+
+        .controls { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+        button { width: 100%; padding: 14px; font-size: 16px; font-weight: bold; border: none; border-radius: 16px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 5px 0 #d94848; transition: all 0.1s; }
+        button:active { transform: translateY(3px); box-shadow: 0 2px 0 #d94848; }
+        .guide { font-size: 12px; color: #8c7365; text-align: center; margin-top: 4px; }
+
+        /* 게임오버 모달 */
+        #game-over { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 10; }
+        .modal-content { background: #fff; padding: 30px; border-radius: 24px; text-align: center; width: 80%; max-width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-content h2 { color: #ff6b6b; margin-bottom: 10px; font-size: 22px; }
+        .modal-content p { margin-bottom: 20px; font-size: 15px; color: #666; }
+    </style>
 </head>
 <body>
-<header>
-<h1>✈️ Tasty Travels</h1>
-<div class="score-board">점수: <span id="score">0</span></div>
-</header>
+    <header>
+        <h1>✈️ Tasty Travels</h1>
+        <div class="score-container">
+            <div class="score-box">점수 <span id="score">0</span></div>
+            <div class="score-box">최고 기록 <span id="best-score">0</span></div>
+        </div>
+    </header>
 
-<div class="board" id="board"></div>
+    <div class="board" id="board"></div>
 
-<div style="width: 100%; max-width: 360px;">
-<div class="controls">
-<button onclick="spawnItem()">재료 상자 열기 📦</button>
-</div>
-<p class="guide">같은 요리를 드래그하거나 클릭해서 합쳐보세요!</p>
-</div>
+    <div class="controls">
+        <button onclick="spawnItem()">재료 상자 열기 📦</button>
+        <p class="guide">같은 요리를 두 번 터치해서 합쳐보세요!</p>
+    </div>
 
-<script>
-const items = ['💧', '🌾', '🍞', '🧀', '🍳', '🍔', '🍕', '🍰', '👑'];
-let board = Array(16).fill(0);
-let score = 0;
-let selectedIdx = null;
+    <div id="game-over">
+        <div class="modal-content">
+            <h2>Game Over! 😢</h2>
+            <p>보드판이 꽉 찼습니다!<br>최종 점수: <span id="final-score" style="font-weight:bold; color:#ff6b6b;">0</span>점</p>
+            <button onclick="resetGame()">다시 시작하기</button>
+        </div>
+    </div>
 
-function updateView() {
-const boardEl = document.getElementById('board');
-boardEl.innerHTML = '';
-board.forEach((val, idx) => {
-const cell = document.createElement('div');
-cell.className = 'cell';
-if (val > 0) {
-cell.innerText = items[val - 1];
-if (selectedIdx === idx) cell.style.border = '3px solid #ff6b6b';
-}
-cell.onclick = () => handleCellClick(idx);
-boardEl.appendChild(cell);
-});
-document.getElementById('score').innerText = score;
-}
+    <script>
+        const stages = [
+            { icon: '💧', name: '맑은 물' },
+            { icon: '🌾', name: '황금 밀' },
+            { icon: '🍞', name: '고소한 빵' },
+            { icon: '🧀', name: '신선 치즈' },
+            { icon: '🍳', name: '달걀후라이' },
+            { icon: '🍔', name: '수제 햄버거' },
+            { icon: '🍕', name: '화덕 피자' },
+            { icon: '🥞', name: '팬케이크' },
+            { icon: '🍰', name: '딸기 케이크' },
+            { icon: '👑', name: '미슐랭 요리' }
+        ];
 
-function spawnItem() {
-const emptyIdxs = board.map((val, idx) => val === 0 ? idx : null).filter(val => val !== null);
-if (emptyIdxs.length === 0) {
-alert('자리가 부족합니다!');
-return;
-}
-const randomIdx = emptyIdxs[Math.floor(Math.random() * emptyIdxs.length)];
-board[randomIdx] = 1; // 기본 재료(물/밀 등) 생성
-updateView();
-}
+        let board = Array(16).fill(0);
+        let score = 0;
+        let bestScore = localStorage.getItem('tasty_best') || 0;
+        let selectedIdx = null;
 
-function handleCellClick(idx) {
-if (selectedIdx === null) {
-if (board[idx] > 0) {
-selectedIdx = idx;
-updateView();
-}
-} else {
-if (selectedIdx === idx) {
-selectedIdx = null; // 취소
-} else if (board[selectedIdx] === board[idx]) {
-// 같은 아이템 합치기
-board[idx] = board[idx] + 1;
-score += board[idx] * 10;
-board[selectedIdx] = 0;
-selectedIdx = null;
-} else {
-// 다른 아이템이면 선택 이동
-selectedIdx = board[idx] > 0 ? idx : null;
-}
-updateView();
-}
-}
+        document.getElementById('best-score').innerText = bestScore;
 
-// 초기 시작 아이템 2개 제공
-spawnItem();
-spawnItem();
-</script>
+        function updateView() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            
+            board.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                if (selectedIdx === idx) cell.classList.add('selected');
+
+                if (val > 0) {
+                    const item = stages[val - 1];
+                    cell.innerHTML = `
+                        <div class="item-icon">${item.icon}</div>
+                        <div class="item-name">${item.name}</div>
+                    `;
+                }
+                cell.onclick = () => handleCellClick(idx);
+                boardEl.appendChild(cell);
+            });
+
+            document.getElementById('score').innerText = score;
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('tasty_best', bestScore);
+                document.getElementById('best-score').innerText = bestScore;
+            }
+        }
+
+        function spawnItem() {
+            const emptyIdxs = board.map((val, idx) => val === 0 ? idx : null).filter(val => val !== null);
+            if (emptyIdxs.length === 0) {
+                checkGameOver();
+                return;
+            }
+            const randomIdx = emptyIdxs[Math.floor(Math.random() * emptyIdxs.length)];
+            board[randomIdx] = 1; // 1단계(물) 생성
+            updateView();
+            
+            if (board.filter(v => v === 0).length === 0) {
+                checkGameOver();
+            }
+        }
+
+        function handleCellClick(idx) {
+            if (selectedIdx === null) {
+                if (board[idx] > 0) {
+                    selectedIdx = idx;
+                    updateView();
+                }
+            } else {
+                if (selectedIdx === idx) {
+                    selectedIdx = null; // 선택 해제
+                } else if (board[selectedIdx] === board[idx]) {
+                    // 머지 성공!
+                    board[idx] = Math.min(board[idx] + 1, stages.length);
+                    score += board[idx] * 20;
+                    board[selectedIdx] = 0;
+                    selectedIdx = null;
+                    updateView();
+                } else {
+                    // 다른 아이템을 누르면 선택 전환
+                    selectedIdx = board[idx] > 0 ? idx : null;
+                }
+                updateView();
+            }
+        }
+
+        function checkGameOver() {
+            const emptyIdxs = board.filter(v => v === 0);
+            if (emptyIdxs.length === 0) {
+                // 인접한 같은 칸이 있는지 체크하는 로직 생략 후 단순 빈칸 여부로 판단
+                document.getElementById('final-score').innerText = score;
+                document.getElementById('game-over').style.display = 'flex';
+            }
+        }
+
+        function resetGame() {
+            board = Array(16).fill(0);
+            score = 0;
+            selectedIdx = null;
+            document.getElementById('game-over').style.display = 'none';
+            spawnItem();
+            spawnItem();
+        }
+
+        // 초기 시작 아이템 2개 제공
+        spawnItem();
+        spawnItem();
+    </script>
 </body>
 </html>
