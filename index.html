@@ -12,7 +12,7 @@
             font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
             -webkit-tap-highlight-color: transparent; 
             touch-action: manipulation; 
-            -webkit-touch-callout: none; /* 아이폰 터치 메뉴(복사/조절 등) 방지 */
+            -webkit-touch-callout: none; 
             -webkit-user-select: none; 
             user-select: none; 
         }
@@ -26,7 +26,21 @@
         .score-box span { display: block; font-size: 18px; color: #ff6b6b; margin-top: 2px; }
         
         .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; aspect-ratio: 1; background: #e3d5c8; padding: 12px; border-radius: 20px; box-shadow: inset 0 4px 8px rgba(0,0,0,0.08); }
-        .cell { background: #fdf0ed; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; box-shadow: 0 4px 0 #d7c4b7; transition: all 0.1s ease; }
+        
+        /* 핵심: 평소에도 동일한 두께의 투명 테두리를 주어 선택될 때 크기가 변해 밀리는 현상을 원천 방지합니다 */
+        .cell { 
+            background: #fdf0ed; 
+            border-radius: 14px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            position: relative; 
+            box-shadow: 0 4px 0 #d7c4b7; 
+            border: 3px solid transparent; 
+            transition: transform 0.1s ease, background-color 0.1s ease; 
+        }
         .cell:active { transform: translateY(2px); box-shadow: 0 2px 0 #d7c4b7; }
         .cell.selected { background: #ffe3e3 !important; border: 3px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.5); }
         
@@ -48,7 +62,7 @@
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.0.4</div>
+        <div class="version">v1.0.5</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
@@ -71,6 +85,22 @@
     </div>
 
     <script>
+        // 두 손가락 터치(핀치 줌)로 인한 화면 확대 원천 차단
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault(); // 더블 탭 확대 방지
+            }
+            lastTouchEnd = now;
+        }, false);
+
         const stages = [
             { icon: '💧', name: '맑은 물' },
             { icon: '🌾', name: '황금 밀' },
@@ -108,15 +138,10 @@
                     `;
                 }
                 
-                // 터치 즉시 반응하도록 touchend 이벤트 활용 및 기본 확대 동작 방지
                 cell.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     handleCellClick(idx);
                 });
-                // PC 환경 테스트를 위한 click 이벤트 호환
-                cell.onclick = () => {
-                    // 터치가 지원되는 기기에서는 touchend가 먼저 실행되므로 중복 실행 방지
-                };
 
                 boardEl.appendChild(cell);
             });
@@ -129,7 +154,6 @@
             }
         }
 
-        // PC 환경을 위해 기존 click 핸들러도 안전하게 작동하도록 보완
         function handleCellClick(idx) {
             if (selectedIdx === null) {
                 if (board[idx] > 0) {
@@ -154,15 +178,12 @@
             }
         }
 
-        // PC 클릭용 별도 연결
         document.getElementById('board').addEventListener('click', (e) => {
             const cellEl = e.target.closest('.cell');
             if (!cellEl) return;
             const cells = Array.from(document.getElementById('board').children);
             const idx = cells.indexOf(cellEl);
             if (idx !== -1) {
-                // 모바일 터치 환경이 아닐 때만 click으로 처리
-                // (모바일은 touchend에서 이미 처리됨)
                 if (!('ontouchstart' in window)) {
                     handleCellClick(idx);
                 }
