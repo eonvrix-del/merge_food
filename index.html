@@ -53,9 +53,15 @@
         }
         .cell:active { transform: translateY(1px); box-shadow: 0 1px 0 #d7c4b7; }
         .cell.selected { background: #ffe3e3 !important; border: 2px solid #ff6b6b; box-shadow: 0 0 6px rgba(255,107,107,0.5); }
-        .cell.box-item { background: #fff3cd; border: 2px dashed #ffecb5; }
+        .cell.box-item { flex-direction: column; gap: 1px; background: #fff3cd; border: 2px dashed #ffecb5; }
+        .cell.box-item.box-fruit { background: #ffe8e0; border-color: #ff9d76; }
+        .cell.box-item.box-coffee { background: #ecdfd2; border-color: #8a5a3b; }
+        .cell.box-item.box-cookie { background: #fff0cf; border-color: #e0a83e; }
+        .cell.box-item.box-toy { background: #e2f0ff; border-color: #5b9bd5; }
 
         .item-icon { font-size: 26px; line-height: 1; pointer-events: none; }
+        .box-item .item-icon { font-size: 22px; }
+        .box-label { font-size: 7px; font-weight: bold; line-height: 1.1; color: #6b5642; pointer-events: none; white-space: nowrap; }
 
         .controls { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 5px; }
         button { width: 100%; padding: 11px; font-size: 14px; font-weight: bold; border: none; border-radius: 12px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 4px 0 #d94848; transition: all 0.1s; }
@@ -71,7 +77,7 @@
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.1.1 (Team Boxes)</div>
+        <div class="version">v1.1.2 (Distinct Boxes)</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
@@ -82,7 +88,7 @@
 
     <div class="controls">
         <button onclick="spawnRandomBox()">팀별 꾸러미 상자 소환 📦</button>
-        <p class="guide">팀별 상자(🧺, ☕, 🍪, 🎁)를 열어 하위 아이템을 획득하세요!</p>
+        <p class="guide">과일바구니🧺, 커피머신⚙️, 과자상자📦, 장난감상자🎁를 열어 하위 아이템을 획득하세요!</p>
     </div>
 
     <div id="game-over">
@@ -111,10 +117,10 @@
 
         // 🍎 4가지 팀 정의 및 팀별 상자 아이콘 지정
         const teamsConfig = {
-            fruit: { name: '과일', boxIcon: '🧺' },
-            coffee: { name: '커피', boxIcon: '☕' },
-            cookie: { name: '과자', boxIcon: '🍪' },
-            toy: { name: '장난감', boxIcon: '🎁' }
+            fruit: { name: '과일', boxIcon: '🧺', boxLabel: '과일바구니' },
+            coffee: { name: '커피', boxIcon: '⚙️', boxLabel: '커피머신' },
+            cookie: { name: '과자', boxIcon: '📦', boxLabel: '과자상자' },
+            toy: { name: '장난감', boxIcon: '🎁', boxLabel: '장난감상자' }
         };
 
         const itemRegistry = [
@@ -162,9 +168,9 @@
                 if (selectedIdx === idx) cell.classList.add('selected');
 
                 if (cellData && cellData.isBox) {
-                    // 팀별 상자 표시 (과일바구니, 커피머신, 과자박스, 장난감박스)
-                    cell.classList.add('box-item');
-                    cell.innerHTML = `<div class="item-icon">${cellData.boxIcon}</div>`;
+                    // 팀별 상자 표시 (과일바구니, 커피머신, 과자상자, 장난감상자)
+                    cell.classList.add('box-item', `box-${cellData.team}`);
+                    cell.innerHTML = `<div class="item-icon">${cellData.boxIcon}</div><div class="box-label">${cellData.boxLabel}</div>`;
                 } else if (cellData !== null) {
                     cell.innerHTML = `<div class="item-icon">${cellData.icon}</div>`;
                 }
@@ -268,7 +274,8 @@
             board[target] = {
                 isBox: true,
                 team: chosenTeamKey,
-                boxIcon: teamsConfig[chosenTeamKey].boxIcon
+                boxIcon: teamsConfig[chosenTeamKey].boxIcon,
+                boxLabel: teamsConfig[chosenTeamKey].boxLabel
             };
             updateView();
         }
@@ -315,7 +322,8 @@
                     board[i] = {
                         isBox: true,
                         team: chosenTeam,
-                        boxIcon: teamsConfig[chosenTeam].boxIcon
+                        boxIcon: teamsConfig[chosenTeam].boxIcon,
+                        boxLabel: teamsConfig[chosenTeam].boxLabel
                     };
                 } else {
                     board[i] = null;
