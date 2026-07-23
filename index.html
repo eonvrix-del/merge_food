@@ -43,7 +43,6 @@
             background: #fdf0ed; 
             border-radius: 6px; 
             display: flex; 
-            flex-direction: column; 
             align-items: center; 
             justify-content: center; 
             cursor: pointer; 
@@ -56,8 +55,8 @@
         .cell.selected { background: #ffe3e3 !important; border: 2px solid #ff6b6b; box-shadow: 0 0 6px rgba(255,107,107,0.5); }
         .cell.box-item { background: #fff3cd; border: 2px dashed #ffecb5; }
 
-        .item-icon { font-size: 18px; line-height: 1; margin-bottom: 2px; pointer-events: none; }
-        .item-name { font-size: 6.5px; font-weight: bold; color: #7a6558; background: rgba(255,255,255,0.7); padding: 1px 3px; border-radius: 3px; pointer-events: none; }
+        /* 글자를 완전히 제거하고 아이콘 크기를 크게 키움 */
+        .item-icon { font-size: 26px; line-height: 1; pointer-events: none; }
 
         .controls { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 5px; }
         button { width: 100%; padding: 11px; font-size: 14px; font-weight: bold; border: none; border-radius: 12px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 4px 0 #d94848; transition: all 0.1s; }
@@ -73,7 +72,7 @@
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.0.8 (Global Kitchen)</div>
+        <div class="version">v1.0.9 (Big Icon)</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
@@ -84,7 +83,7 @@
 
     <div class="controls">
         <button onclick="spawnMysteryBox()">랜덤 재료 상자 열기 📦</button>
-        <p class="guide">상자를 열어 다양한 글로벌 식재료를 수집하고 합쳐보세요!</p>
+        <p class="guide">글자를 없애고 아이콘을 키워 한눈에 알아보기 쉽게 만들었습니다!</p>
     </div>
 
     <div id="game-over">
@@ -111,29 +110,14 @@
             lastTouchEnd = now;
         }, false);
 
-        // 15단계의 풍성한 Tasty Travels 글로벌 요리/식재료 데이터
         const stages = [
-            { icon: '💧', name: '맑은 물' },      // 1
-            { icon: '🌾', name: '황금 밀' },      // 2
-            { icon: '☕', name: '향긋 원두' },    // 3
-            { icon: '🍎', name: '신선 사과' },    // 4
-            { icon: '🍞', name: '고소한 빵' },    // 5
-            { icon: '🧀', name: '신선 치즈' },    // 6
-            { icon: '🍳', name: '달걀후라이' },  // 7
-            { icon: '🍔', name: '수제 햄버거' },  // 8
-            { icon: '🍕', name: '화덕 피자' },    // 9
-            { icon: '🍣', name: '특선 초밥' },    // 10
-            { icon: '🥩', name: '스테이크' },    // 11
-            { icon: '🥞', name: '팬케이크' },    // 12
-            { icon: '🍰', name: '딸기 케이크' },  // 13
-            { icon: '🍾', name: '스페셜 샴페인' },// 14
-            { icon: '👑', name: '미슐랭 셰프 코스' }// 15
+            '💧', '🌾', '☕', '🍎', '🍞', '🧀', '🍳', '🍔', '🍕', '🍣', '🥩', '🥞', '🍰', '🍾', '👑'
         ];
 
-        const TOTAL_CELLS = 7 * 9; // 63칸
+        const TOTAL_CELLS = 7 * 9; 
         let board = Array(TOTAL_CELLS).fill(0);
         let score = 0;
-        let bestScore = localStorage.getItem('tasty_best_v3') || 0;
+        let bestScore = localStorage.getItem('tasty_best_v4') || 0;
         let selectedIdx = null;
 
         document.getElementById('best-score').innerText = bestScore;
@@ -149,16 +133,10 @@
 
                 if (val === 99) {
                     cell.classList.add('box-item');
-                    cell.innerHTML = `
-                        <div class="item-icon">📦</div>
-                        <div class="item-name">재료상자</div>
-                    `;
+                    cell.innerHTML = `<div class="item-icon">📦</div>`;
                 } else if (val > 0) {
-                    const item = stages[val - 1];
-                    cell.innerHTML = `
-                        <div class="item-icon">${item.icon}</div>
-                        <div class="item-name">${item.name}</div>
-                    `;
+                    const icon = stages[val - 1];
+                    cell.innerHTML = `<div class="item-icon">${icon}</div>`;
                 }
                 
                 cell.addEventListener('touchend', (e) => {
@@ -172,7 +150,7 @@
             document.getElementById('score').innerText = score;
             if (score > bestScore) {
                 bestScore = score;
-                localStorage.setItem('tasty_best_v3', bestScore);
+                localStorage.setItem('tasty_best_v4', bestScore);
                 document.getElementById('best-score').innerText = bestScore;
             }
         }
@@ -195,8 +173,7 @@
                     let currentVal = board[idx];
                     let nextVal = currentVal + 1;
                     
-                    // 15% 확률로 대박 진화 (+2단계)
-                    if (Math.random() < 0.15 && currentVal < stages.length - 1) {
+                    if (Math.random() < 0.15 && currentVal < stages.length) {
                         nextVal = currentVal + 2; 
                     }
                     
@@ -217,14 +194,12 @@
             board[boxIdx] = 0; 
             let emptyIdxs = board.map((val, i) => val === 0 ? i : null).filter(v => v !== null);
             
-            // 상자를 열면 3~6개의 다양한 하위 재료들이 무작위로 쏟아짐
             let dropCount = Math.min(emptyIdxs.length, Math.floor(Math.random() * 4) + 3);
             for (let i = 0; i < dropCount; i++) {
                 if (emptyIdxs.length === 0) break;
                 let randPosIdx = Math.floor(Math.random() * emptyIdxs.length);
                 let targetCell = emptyIdxs.splice(randPosIdx, 1)[0];
                 
-                // 1~5단계 사이의 재료가 랜덤하게 드랍
                 let r = Math.random();
                 let spawnedVal = 1;
                 if (r < 0.4) spawnedVal = 1;
@@ -286,11 +261,11 @@
                 let r = Math.random();
                 if (r < 0.6) {
                     let subR = Math.random();
-                    board[i] = subR < 0.5 ? 1 : (subR < 0.8 ? 2 : 3); // 1~3단계 일반 재료
+                    board[i] = subR < 0.5 ? 1 : (subR < 0.8 ? 2 : 3);
                 } else if (r < 0.7) {
-                    board[i] = 99; // 상자
+                    board[i] = 99;
                 } else {
-                    board[i] = 0; // 빈칸
+                    board[i] = 0;
                 }
             }
             updateView();
