@@ -16,26 +16,66 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        body { background: #fdfbf7; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; height: 100dvh; padding: 12px 5px; color: #4a3b32; overflow: hidden; }
-        header { text-align: center; width: 100%; position: relative; }
-        h1 { font-size: 21px; color: #ff6b6b; margin-bottom: 2px; font-weight: 800; text-shadow: 1px 1px 0px #ffe3e3; }
-        .version { font-size: 10px; color: #b09e93; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; }
+        body {
+            background: linear-gradient(160deg, #fff8ef 0%, #ffeede 55%, #ffe3d6 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            height: 100vh; height: 100dvh; padding: 10px 6px 8px; color: #4a3b32; overflow: hidden;
+        }
+        header { text-align: center; width: 100%; max-width: 430px; }
+        h1 { font-size: 20px; color: #ff6b6b; margin-bottom: 1px; font-weight: 800; text-shadow: 1px 1px 0px #ffe3e3; }
+        .version { font-size: 9px; color: #c4b0a4; font-weight: bold; margin-bottom: 5px; letter-spacing: 1px; }
 
-        .score-container { display: flex; justify-content: center; gap: 6px; width: 100%; max-width: 420px; margin-bottom: 6px; }
-        .score-box { background: #fff; padding: 5px 6px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); font-size: 11px; font-weight: bold; flex: 1; text-align: center; border: 2px solid #fae1dd; }
+        .score-container { display: flex; justify-content: center; gap: 6px; width: 100%; margin-bottom: 6px; }
+        .score-box {
+            background: rgba(255,255,255,0.9); padding: 4px 6px; border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(180,120,90,0.10); font-size: 10px; font-weight: bold;
+            flex: 1; text-align: center; border: 2px solid #ffe0d6; color: #a08575;
+        }
         .score-box span { display: block; font-size: 14px; color: #ff6b6b; margin-top: 1px; }
+        .score-box.points-box { border-color: #ffd47e; }
+        .score-box.points-box span { color: #f5a623; }
 
-        .stage-bar { display: flex; align-items: center; gap: 6px; width: 100%; max-width: 420px; margin-bottom: 6px; }
-        .stage-label { flex: 1; font-size: 11px; font-weight: bold; color: #8c7365; background: #fff; padding: 6px 10px; border-radius: 12px; border: 2px solid #fae1dd; }
+        .stage-bar { display: flex; align-items: stretch; gap: 6px; width: 100%; margin-bottom: 6px; }
+        .stage-label {
+            flex: 1; font-size: 11px; font-weight: bold; color: #8c7365;
+            background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 12px; border: 2px solid #ffe0d6;
+            position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
         .stage-label b { color: #ff6b6b; }
-        .next-stage-btn { flex: 0 0 auto; width: auto; padding: 8px 12px; font-size: 11px; border-radius: 12px; background: #c9c9c9; color: #fff; box-shadow: 0 3px 0 #a3a3a3; cursor: not-allowed; }
-        .next-stage-btn.ready { background: #4caf50; box-shadow: 0 3px 0 #357a38; cursor: pointer; }
-        .next-stage-btn.ready:active { transform: translateY(2px); box-shadow: 0 1px 0 #357a38; }
+        .stage-fill {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+            background: linear-gradient(90deg, #ffe9a8, #ffd47e); z-index: 0;
+            transition: width 0.4s ease; border-radius: 9px;
+        }
+        .stage-text { position: relative; z-index: 1; }
+        .next-stage-btn {
+            flex: 0 0 auto; width: auto; padding: 7px 12px; font-size: 11px; font-weight: bold;
+            border: none; border-radius: 12px; background: #cfc5bd; color: #fff;
+            box-shadow: 0 3px 0 #b0a49a; cursor: not-allowed; transition: all 0.15s;
+        }
+        .next-stage-btn.ready {
+            background: linear-gradient(180deg, #5ec46a, #43a950); box-shadow: 0 3px 0 #35803f; cursor: pointer;
+            animation: btnGlow 1.2s ease-in-out infinite;
+        }
+        .next-stage-btn.ready:active { transform: translateY(2px); box-shadow: 0 1px 0 #35803f; }
+        @keyframes btnGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.18); }
+        }
 
-        .goals-bar { display: flex; justify-content: space-between; gap: 4px; width: 100%; max-width: 420px; margin-bottom: 6px; }
-        .goal-slot { flex: 1; background: #fff; border-radius: 10px; padding: 3px 2px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); border: 2px solid #fae1dd; }
-        .goal-slot.complete { border-color: #4caf50; background: #eaffea; }
-        .goal-icon { font-size: 18px; line-height: 1; }
+        .goals-bar { display: flex; justify-content: space-between; gap: 4px; width: 100%; margin-bottom: 6px; }
+        .goal-slot {
+            flex: 1; background: rgba(255,255,255,0.92); border-radius: 10px; padding: 3px 2px; text-align: center;
+            box-shadow: 0 2px 5px rgba(180,120,90,0.10); border: 2px solid #ffe0d6; transition: transform 0.15s;
+        }
+        .goal-slot.complete { border-color: #5ec46a; background: #eaffea; animation: goalPop 0.35s ease; }
+        .goal-slot.bump { animation: goalPop 0.3s ease; }
+        @keyframes goalPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+        .goal-icon { font-size: 19px; line-height: 1; }
         .goal-count { font-size: 9px; font-weight: bold; color: #ff6b6b; margin-top: 1px; }
 
         /* 7 x 9 대형 보드판 그리드 */
@@ -45,29 +85,37 @@
             grid-template-rows: repeat(9, 1fr);
             gap: 4px;
             width: 100%;
-            max-width: 420px;
+            max-width: 430px;
             aspect-ratio: 7 / 9;
-            background: #e3d5c8;
+            background: linear-gradient(180deg, #e8d8c9, #dfcbb9);
             padding: 6px;
-            border-radius: 16px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.08);
+            border-radius: 18px;
+            box-shadow: inset 0 3px 8px rgba(120,80,55,0.14), 0 4px 12px rgba(180,120,90,0.12);
         }
 
         .cell {
-            background: #fdf0ed;
-            border-radius: 6px;
+            background: #fdf1ea;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             position: relative;
-            box-shadow: 0 2px 0 #d7c4b7;
+            box-shadow: 0 2px 0 #d8c3b3;
             border: 2px solid transparent;
             transition: transform 0.1s ease, background-color 0.1s ease;
             touch-action: none;
         }
-        .cell:active { transform: translateY(1px); box-shadow: 0 1px 0 #d7c4b7; }
-        .cell.selected { background: #ffe3e3 !important; border: 2px solid #ff6b6b; box-shadow: 0 0 6px rgba(255,107,107,0.5); }
+        .cell:active { transform: translateY(1px); box-shadow: 0 1px 0 #d8c3b3; }
+        .cell.selected {
+            background: #ffe3e3 !important; border: 2px solid #ff6b6b;
+            box-shadow: 0 0 8px rgba(255,107,107,0.55);
+            animation: selPulse 0.9s ease-in-out infinite;
+        }
+        @keyframes selPulse {
+            0%, 100% { box-shadow: 0 0 4px rgba(255,107,107,0.4); }
+            50% { box-shadow: 0 0 10px rgba(255,107,107,0.75); }
+        }
         .cell.box-item { flex-direction: column; gap: 1px; background: #fff3cd; border: 2px dashed #ffecb5; }
         .cell.box-item.box-fruit { background: #ffe8e0; border-color: #ff9d76; }
         .cell.box-item.box-coffee { background: #ecdfd2; border-color: #8a5a3b; }
@@ -77,44 +125,99 @@
 
         .item-icon { font-size: 32px; line-height: 1; pointer-events: none; }
         .box-item .item-icon { font-size: 26px; pointer-events: none; }
+
+        /* 새 아이템 등장 / 머지 애니메이션 */
+        .cell.anim-pop .item-icon { animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes popIn {
+            0% { transform: scale(0.2); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .cell.anim-merge .item-icon { animation: mergeBounce 0.42s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes mergeBounce {
+            0% { transform: scale(0.4); }
+            55% { transform: scale(1.35); }
+            100% { transform: scale(1); }
+        }
+        .cell.anim-crit { animation: critFlash 0.5s ease; }
+        @keyframes critFlash {
+            0% { background: #fff3a1; }
+            100% { background: #fdf1ea; }
+        }
+
         .box-label { font-size: 6.5px; font-weight: bold; line-height: 1.1; color: #6b5642; pointer-events: none; white-space: nowrap; }
         .box-count {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: #ff6b6b;
-            color: #fff;
-            font-size: 8px;
-            font-weight: 800;
-            border-radius: 7px;
-            padding: 0 3px;
-            line-height: 1.4;
-            pointer-events: none;
+            position: absolute; top: 2px; right: 2px;
+            background: #ff6b6b; color: #fff; font-size: 8px; font-weight: 800;
+            border-radius: 7px; padding: 0 3px; line-height: 1.4; pointer-events: none;
         }
         .cell.box-item.empty .box-count { background: #9a9a9a; }
 
-        .controls { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 5px; }
-        button { width: 100%; padding: 11px; font-size: 14px; font-weight: bold; border: none; border-radius: 12px; background: #ff6b6b; color: white; cursor: pointer; box-shadow: 0 4px 0 #d94848; transition: all 0.1s; }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #d94848; }
-        .guide { font-size: 10px; color: #8c7365; text-align: center; }
+        /* 플로팅 획득 텍스트 */
+        .float-text {
+            position: fixed; z-index: 50; pointer-events: none;
+            font-weight: 800; font-size: 14px; color: #f5a623;
+            text-shadow: 0 1px 3px rgba(255,255,255,0.9), 0 0 2px #fff;
+            animation: floatUp 1s ease-out forwards;
+            white-space: nowrap; transform: translateX(-50%);
+        }
+        .float-text.crit { color: #ff4d6d; font-size: 16px; }
+        .float-text.combo { color: #7c4dff; }
+        @keyframes floatUp {
+            0% { opacity: 0; margin-top: 0; }
+            15% { opacity: 1; }
+            100% { opacity: 0; margin-top: -46px; }
+        }
 
-        #game-over { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 10; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 20px; text-align: center; width: 80%; max-width: 280px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .controls { width: 100%; max-width: 430px; display: flex; flex-direction: column; gap: 4px; }
+        button { border: none; cursor: pointer; }
+        .guide { font-size: 9.5px; color: #a08575; text-align: center; line-height: 1.45; }
+        .reset-link { background: none; color: #c4b0a4; font-size: 9.5px; text-decoration: underline; padding: 2px; }
+
+        /* 모달 & 축하 연출 */
+        #game-over, #stage-clear {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 10;
+        }
+        .modal-content {
+            background: #fff; padding: 25px; border-radius: 20px; text-align: center;
+            width: 80%; max-width: 280px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
         .modal-content h2 { color: #ff6b6b; margin-bottom: 8px; font-size: 20px; }
         .modal-content p { margin-bottom: 15px; font-size: 14px; color: #666; }
+        .modal-content button {
+            width: 100%; padding: 11px; font-size: 14px; font-weight: bold; border-radius: 12px;
+            background: #ff6b6b; color: white; box-shadow: 0 4px 0 #d94848; transition: all 0.1s;
+        }
+        .modal-content button:active { transform: translateY(2px); box-shadow: 0 2px 0 #d94848; }
+
+        #stage-clear .modal-content { background: linear-gradient(160deg, #fffdf5, #fff3d6); border: 3px solid #ffd47e; }
+        #stage-clear h2 { color: #f5a623; font-size: 24px; }
+
+        .confetti-piece {
+            position: fixed; top: -30px; z-index: 60; pointer-events: none; font-size: 22px;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(360deg); opacity: 0.7; }
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>✈️ Tasty Travels</h1>
-        <div class="version">v1.3.1 (Bigger Icons, Even Rows)</div>
+        <div class="version">v1.4.0 (Fun & Polish)</div>
         <div class="score-container">
             <div class="score-box">점수 <span id="score">0</span></div>
             <div class="score-box">최고 기록 <span id="best-score">0</span></div>
-            <div class="score-box">포인트 <span id="points">0</span></div>
+            <div class="score-box points-box">포인트 <span id="points">0</span></div>
         </div>
         <div class="stage-bar">
-            <div class="stage-label">스테이지 <b id="stage-num">1</b> · <span id="stage-progress">0/300</span></div>
+            <div class="stage-label">
+                <div class="stage-fill" id="stage-fill"></div>
+                <span class="stage-text">스테이지 <b id="stage-num">1</b> · <span id="stage-progress">0/300</span></span>
+            </div>
             <button id="next-stage-btn" class="next-stage-btn" onclick="goToNextStage()" disabled>다음 스테이지 🚀</button>
         </div>
         <div class="goals-bar" id="goals"></div>
@@ -123,14 +226,22 @@
     <div class="board" id="board"></div>
 
     <div class="controls">
-        <p class="guide">상단 목표 아이템을 만들면 포인트 획득! 포인트가 다 차면 다음 스테이지로 이동하세요. 과일 박스🧺·커피 박스⚙️·과자 박스📦·장난감 박스🎁는 톡 터치하면 아이템이 1개 나오고, 10개까지 채워지며 다 쓰면 시간이 지나 다시 채워집니다. 상자를 꾹 눌러 드래그하면 다른 칸과 위치를 바꿀 수 있어요.</p>
+        <p class="guide">상단 목표 아이템을 만들면 포인트 획득! 연속으로 빠르게 합치면 <b>콤보 보너스</b>, 가끔 <b>대박 진화</b>로 2단계를 건너뜁니다.<br>박스는 톡 터치하면 아이템 배출(최대 10개, 시간이 지나면 재충전), 꾹 눌러 드래그하면 위치 이동!</p>
+        <button class="reset-link" onclick="confirmNewGame()">🔄 처음부터 새 게임</button>
     </div>
 
     <div id="game-over">
         <div class="modal-content">
             <h2>Game Over! 😢</h2>
-            <p>보드판에 빈자리가 없습니다!<br>최종 점수: <span id="final-score" style="font-weight:bold; color:#ff6b6b;">0</span>점</p>
+            <p>더 이상 합칠 수 있는 아이템이 없어요!<br>최종 점수: <span id="final-score" style="font-weight:bold; color:#ff6b6b;">0</span>점</p>
             <button onclick="resetGame()">다시 시작하기</button>
+        </div>
+    </div>
+
+    <div id="stage-clear">
+        <div class="modal-content">
+            <h2>🎉 스테이지 클리어!</h2>
+            <p id="stage-clear-msg">다음 여행지로 출발합니다!</p>
         </div>
     </div>
 
@@ -213,9 +324,14 @@
         const GOAL_POINT_REWARD = 20;
         const GOAL_COMPLETE_BONUS = 50;
 
+        const COMBO_WINDOW_MS = 4000; // 이 시간 안에 연속 머지하면 콤보 유지
+        const CRIT_CHANCE = 0.12;     // 대박 진화(2단계 점프) 확률
+
+        const SAVE_KEY = 'tasty_save_v1';
+
         let board = Array(TOTAL_CELLS).fill(null);
         let score = 0;
-        let bestScore = localStorage.getItem('tasty_best_v7') || 0;
+        let bestScore = parseInt(localStorage.getItem('tasty_best_v7')) || 0;
         let selectedIdx = null;
         let dragState = null; // { idx, x, y }
 
@@ -223,7 +339,33 @@
         let points = 0;
         let goals = []; // [{ team, tier, icon, remaining, target }]
 
+        let combo = 0;
+        let lastMergeAt = 0;
+        let pendingAnims = new Map(); // idx -> 'pop' | 'merge' | 'crit'
+
         document.getElementById('best-score').innerText = bestScore;
+
+        // ── 저장/불러오기: 새로고침해도 진행상황 유지 ──────────────────
+        function saveGame() {
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify({ board, score, stage, points, goals }));
+            } catch (e) { /* 저장 공간 부족 등은 조용히 무시 */ }
+        }
+
+        function loadGame() {
+            try {
+                const raw = localStorage.getItem(SAVE_KEY);
+                if (!raw) return false;
+                const s = JSON.parse(raw);
+                if (!Array.isArray(s.board) || s.board.length !== TOTAL_CELLS || !Array.isArray(s.goals)) return false;
+                board = s.board;
+                score = s.score || 0;
+                stage = s.stage || 1;
+                points = s.points || 0;
+                goals = s.goals;
+                return true;
+            } catch (e) { return false; }
+        }
 
         // 스테이지가 올라갈수록 다음 스테이지 진입에 필요한 포인트도 늘어남
         function stageThreshold(s) {
@@ -246,31 +388,49 @@
             renderGoals();
         }
 
-        function renderGoals() {
+        function renderGoals(bumpIdx) {
             const goalsEl = document.getElementById('goals');
-            goalsEl.innerHTML = goals.map(g => `
-                <div class="goal-slot${g.remaining <= 0 ? ' complete' : ''}">
+            goalsEl.innerHTML = goals.map((g, i) => `
+                <div class="goal-slot${g.remaining <= 0 ? ' complete' : ''}${i === bumpIdx ? ' bump' : ''}">
                     <div class="goal-icon">${g.icon}</div>
                     <div class="goal-count">${Math.max(0, g.remaining)}/${g.target}</div>
                 </div>
             `).join('');
         }
 
+        // ── 플로팅 텍스트 (+20P, 콤보, 대박 등) ──────────────────────
+        function floatTextAtCell(idx, text, cls, delay) {
+            setTimeout(() => {
+                const cellEl = document.getElementById('board').children[idx];
+                if (!cellEl) return;
+                const rect = cellEl.getBoundingClientRect();
+                const el = document.createElement('div');
+                el.className = 'float-text' + (cls ? ' ' + cls : '');
+                el.innerText = text;
+                el.style.left = (rect.left + rect.width / 2) + 'px';
+                el.style.top = (rect.top - 4) + 'px';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1050);
+            }, delay || 0);
+        }
+
         // 합치기/상자 배출로 새 아이템이 만들어질 때마다 목표 달성 여부 체크
-        function checkGoalProgress(newItem) {
+        function checkGoalProgress(newItem, cellIdx) {
             if (!newItem || newItem.isBox) return;
             const idx = goals.findIndex(g => g.team === newItem.team && g.tier === newItem.tier && g.remaining > 0);
             if (idx === -1) return;
 
             goals[idx].remaining -= 1;
             points += GOAL_POINT_REWARD;
+            if (cellIdx !== undefined) floatTextAtCell(cellIdx, `+${GOAL_POINT_REWARD}P`, '', 60);
 
             if (goals[idx].remaining <= 0) {
                 points += GOAL_COMPLETE_BONUS;
+                if (cellIdx !== undefined) floatTextAtCell(cellIdx, `목표 달성! +${GOAL_COMPLETE_BONUS}P`, 'crit', 350);
                 goals[idx] = randomGoal();
             }
 
-            renderGoals();
+            renderGoals(idx);
             updateStageUI();
         }
 
@@ -279,6 +439,7 @@
             document.getElementById('stage-num').innerText = stage;
             const threshold = stageThreshold(stage);
             document.getElementById('stage-progress').innerText = `${Math.min(points, threshold)}/${threshold}`;
+            document.getElementById('stage-fill').style.width = Math.min(100, points / threshold * 100) + '%';
 
             const btn = document.getElementById('next-stage-btn');
             const ready = points >= threshold;
@@ -286,14 +447,37 @@
             btn.classList.toggle('ready', ready);
         }
 
+        // ── 스테이지 클리어 축하 연출 ────────────────────────────────
+        function celebrateStage(clearedStage) {
+            const overlay = document.getElementById('stage-clear');
+            document.getElementById('stage-clear-msg').innerText = `스테이지 ${clearedStage} 완료! 다음 여행지로 출발~ ✈️`;
+            overlay.style.display = 'flex';
+
+            const emojis = ['🎉', '✨', '🎊', '⭐', '🍬', '💛'];
+            for (let i = 0; i < 24; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti-piece';
+                c.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.animationDuration = (1.4 + Math.random() * 1.2) + 's';
+                c.style.animationDelay = (Math.random() * 0.4) + 's';
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 3200);
+            }
+            setTimeout(() => { overlay.style.display = 'none'; }, 1700);
+        }
+
         // 포인트가 다음 스테이지 진입 기준을 넘으면 새 보드/목표로 스테이지 전환
         function goToNextStage() {
             const threshold = stageThreshold(stage);
             if (points < threshold) return;
 
+            const cleared = stage;
             points -= threshold;
             stage += 1;
             selectedIdx = null;
+            combo = 0;
+            celebrateStage(cleared);
             populateBoard();
             initGoals();
             updateStageUI();
@@ -309,8 +493,13 @@
                 cell.className = 'cell';
                 if (selectedIdx === idx) cell.classList.add('selected');
 
+                const anim = pendingAnims.get(idx);
+                if (anim === 'pop') cell.classList.add('anim-pop');
+                else if (anim === 'merge') cell.classList.add('anim-merge');
+                else if (anim === 'crit') cell.classList.add('anim-merge', 'anim-crit');
+
                 if (cellData && cellData.isBox) {
-                    // 팀별 상자 표시 (과일상자, 커피머신, 과자상자, 장난감상자)
+                    // 팀별 상자 표시 (과일/커피/과자/장난감 박스)
                     cell.classList.add('box-item', `box-${cellData.team}`);
                     if (cellData.charges <= 0) cell.classList.add('empty');
                     cell.innerHTML = `
@@ -328,6 +517,7 @@
 
                 boardEl.appendChild(cell);
             });
+            pendingAnims.clear();
 
             document.getElementById('score').innerText = score;
             if (score > bestScore) {
@@ -335,6 +525,8 @@
                 localStorage.setItem('tasty_best_v7', bestScore);
                 document.getElementById('best-score').innerText = bestScore;
             }
+
+            saveGame();
         }
 
         // 탭(짧게 터치)과 드래그(이동 후 놓기)를 구분해서 처리
@@ -397,26 +589,56 @@
                            firstData.team === cellData.team &&
                            firstData.tier === cellData.tier) {
 
-                    let nextTier = firstData.tier + 1;
-                    let nextItem = itemRegistry.find(i => i.team === firstData.team && i.tier === nextTier);
-
-                    if (nextItem) {
-                        board[idx] = { ...nextItem, isBox: false };
-                        score += board[idx].tier * 50;
-                        checkGoalProgress(board[idx]);
-                    } else {
-                        score += 500;
-                        board[idx] = { ...firstData };
-                    }
-
-                    board[selectedIdx] = null;
-                    selectedIdx = null;
-                    updateView();
+                    doMerge(selectedIdx, idx, firstData);
+                    return;
                 } else {
                     selectedIdx = (cellData !== null && !cellData.isBox) ? idx : null;
                 }
                 updateView();
             }
+        }
+
+        // ── 머지 실행: 콤보 + 대박 진화 + 애니메이션 포함 ─────────────
+        function doMerge(fromIdx, toIdx, itemData) {
+            const now = Date.now();
+            combo = (now - lastMergeAt <= COMBO_WINDOW_MS) ? combo + 1 : 1;
+            lastMergeAt = now;
+
+            let nextTier = itemData.tier + 1;
+            let isCrit = false;
+
+            // 대박 진화: 일정 확률로 한 단계 더 점프
+            if (Math.random() < CRIT_CHANCE) {
+                const skipItem = itemRegistry.find(i => i.team === itemData.team && i.tier === nextTier + 1);
+                if (skipItem) { nextTier += 1; isCrit = true; }
+            }
+
+            const nextItem = itemRegistry.find(i => i.team === itemData.team && i.tier === nextTier);
+
+            if (nextItem) {
+                board[toIdx] = { ...nextItem, isBox: false };
+                // 콤보가 이어질수록 점수 보너스 (기본 + 10%씩)
+                const base = nextItem.tier * 50;
+                const gained = Math.round(base * (1 + (combo - 1) * 0.1));
+                score += gained;
+                pendingAnims.set(toIdx, isCrit ? 'crit' : 'merge');
+                checkGoalProgress(board[toIdx], toIdx);
+
+                if (isCrit) floatTextAtCell(toIdx, '🎉 대박 진화!', 'crit', 0);
+                else if (combo >= 2) floatTextAtCell(toIdx, `콤보 x${combo}!`, 'combo', 0);
+
+                if (navigator.vibrate) navigator.vibrate(isCrit ? 30 : 10);
+            } else {
+                // 최고 단계끼리 합치면 대량 점수
+                score += 500;
+                board[toIdx] = { ...itemData };
+                pendingAnims.set(toIdx, 'merge');
+                floatTextAtCell(toIdx, '+500', 'crit', 0);
+            }
+
+            board[fromIdx] = null;
+            selectedIdx = null;
+            updateView();
         }
 
         // 📦 상자를 터치할 때마다 아이템 1개씩 배출 (대부분 1단계, 가끔 2단계)
@@ -433,7 +655,8 @@
             let spawnedTier = Math.random() < 0.85 ? 1 : 2;
             let spawned = itemRegistry.find(i => i.team === box.team && i.tier === spawnedTier);
             board[target] = { ...spawned, isBox: false };
-            checkGoalProgress(board[target]);
+            pendingAnims.set(target, 'pop');
+            checkGoalProgress(board[target], target);
 
             box.charges -= 1;
             if (box.charges <= 0) {
@@ -448,28 +671,50 @@
         }
 
         // 상자 충전: 최대치 미만이면 일정 시간마다 1개씩 자동으로 채움
+        // (앱을 껐다 켜도 지난 시간만큼 한꺼번에 정산)
         function regenTick() {
             const now = Date.now();
             let changed = false;
             board.forEach(cell => {
                 if (cell && cell.isBox && cell.charges < cell.maxCharges) {
                     if (!cell.nextRegenAt) cell.nextRegenAt = now + REGEN_INTERVAL_MS;
-                    if (now >= cell.nextRegenAt) {
-                        cell.charges = Math.min(cell.maxCharges, cell.charges + 1);
-                        cell.nextRegenAt = cell.charges < cell.maxCharges ? now + REGEN_INTERVAL_MS : null;
+                    while (cell.charges < cell.maxCharges && now >= cell.nextRegenAt) {
+                        cell.charges += 1;
+                        cell.nextRegenAt += REGEN_INTERVAL_MS;
                         changed = true;
                     }
+                    if (cell.charges >= cell.maxCharges) cell.nextRegenAt = null;
                 }
             });
             if (changed) updateView();
         }
         setInterval(regenTick, 1000);
 
+        // 보드에 같은 팀+단계 쌍이 하나라도 있으면 아직 합칠 수 있음
+        function hasAnyMergePair() {
+            const seen = new Set();
+            for (const c of board) {
+                if (!c || c.isBox) continue;
+                const key = c.team + ':' + c.tier;
+                if (seen.has(key)) return true;
+                seen.add(key);
+            }
+            return false;
+        }
+
         function checkGameOver() {
             const emptyCount = board.filter(v => v === null).length;
-            if (emptyCount === 0) {
+            // 빈칸이 없어도 합칠 수 있는 쌍이 남아 있으면 계속 진행 가능
+            if (emptyCount === 0 && !hasAnyMergePair()) {
                 document.getElementById('final-score').innerText = score;
                 document.getElementById('game-over').style.display = 'flex';
+            }
+        }
+
+        function confirmNewGame() {
+            if (confirm('진행 중인 게임을 버리고 처음부터 시작할까요?')) {
+                localStorage.removeItem(SAVE_KEY);
+                resetGame();
             }
         }
 
@@ -477,7 +722,9 @@
             score = 0;
             stage = 1;
             points = 0;
+            combo = 0;
             selectedIdx = null;
+            localStorage.removeItem(SAVE_KEY);
             document.getElementById('game-over').style.display = 'none';
             populateBoard();
             initGoals();
@@ -519,8 +766,13 @@
         }
 
         function initGame() {
-            populateBoard();
-            initGoals();
+            // 저장된 게임이 있으면 이어서, 없으면 새로 시작
+            if (loadGame()) {
+                renderGoals();
+            } else {
+                populateBoard();
+                initGoals();
+            }
             updateStageUI();
             updateView();
         }
